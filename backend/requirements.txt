@@ -1,0 +1,13 @@
+# ---- 已存在于 yy 环境(按实际版本)----
+fastapi==0.139.0
+uvicorn[standard]==0.51.0
+pydantic==2.13.4
+pydantic-settings==2.14.2
+httpx==0.28.1
+
+# ---- 本计划新增 ----
+SQLAlchemy==2.0.36
+psycopg[binary]==3.2.3
+alembic==1.14.0
+pytest==8.3.4
+pytest-asyncio==0.25.0
