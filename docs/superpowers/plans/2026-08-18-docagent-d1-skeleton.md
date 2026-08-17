@@ -13,7 +13,7 @@
 - 本计划所有命令在 **WSL(Ubuntu-22.04)** 内执行。仓库路径 `/home/sjx_0/project/shixi`。
 - Python 环境:**conda env `yy`**(Python 3.12,已装 FastAPI 0.139 / langgraph 1.2 / langchain 1.x)。所有 python/pytest/alembic 命令带前缀:`source ~/miniconda3/etc/profile.d/conda.sh && conda activate yy && <cmd>`。**不要创建新环境,不要降级已有包。**
 - 本计划需新增依赖(装进 `yy`,见 Task 1):`SQLAlchemy`、`psycopg[binary]`、`alembic`、`pytest`、`pytest-asyncio`。
-- **Docker:在 WSL 内原生安装 Docker Engine**(非 Docker Desktop 集成)。WSL 已启用 systemd(`/etc/wsl.conf`),满足运行条件。安装命令需 sudo(交互输入密码),**必须由用户本人执行**,见 Task 4。用户装完后,agent 负责验证并继续。
+- **Docker:使用 Docker Desktop for Windows**,需启动 Desktop 并在 Settings → Resources → WSL Integration 中勾选 `Ubuntu-22.04`(用户 GUI 操作,见 Task 4)。agent 负责验证并继续。
 - `.env`(含密钥)永不提交;提交 `.env.example`。`.gitignore` 已含 `.env`。
 - 本次只起 Postgres + QDrant 两个服务;backend/frontend 容器在 D8 加入 compose。
 - 所有测试只依赖本机/本地基础设施,不调用任何外部 LLM API。
@@ -437,7 +437,7 @@ git commit -m "feat: add FastAPI app factory with health endpoint"
 
 ---
 
-### Task 4: 原生安装 Docker Engine(WSL)+ Compose 基础设施
+### Task 4: Docker Desktop + Compose 基础设施(Postgres + QDrant)
 
 **Files:**
 - Create: `docker-compose.yml`
@@ -446,48 +446,20 @@ git commit -m "feat: add FastAPI app factory with health endpoint"
 - Consumes: `.env`(Task 1,由 compose 读取做变量替换)
 - Produces: WSL 内可用的 Docker Engine + 本地 Postgres(5432)与 QDrant(6333)服务;后续任务与容器(backend/frontend)都依赖
 
-> ⚠️ **本任务 Step 1 必须由用户本人执行**(需要 sudo 密码,agent 无法代替)。WSL 已启用 systemd(`/etc/wsl.conf`),满足原生运行条件。
+> ⚠️ **本任务 Step 1 必须由用户操作(图形界面)**:使用 **Docker Desktop for Windows**,需启动 Docker Desktop,并在 Settings → Resources → WSL Integration 中勾选 `Ubuntu-22.04`。WSL 内 `docker info` 能返回 ServerVersion 即就绪。agent 负责验证并继续后续步骤。
 
-- [ ] **Step 1(用户执行):在 WSL 内安装 Docker Engine**
+- [ ] **Step 1(用户操作):启动 Docker Desktop 并启用 WSL 集成**
 
-在 WSL 终端里执行(遇到密码提示输入你的 sudo 密码):
+1. 启动 Docker Desktop(等待右下角鲸鱼图标变为稳定状态)。
+2. Settings(齿轮)→ Resources → **WSL Integration** → 勾选 **Enable integration with my default WSL distro** 与 **Ubuntu-22.04**。
+3. 点 **Apply & Restart**。
 
-```bash
-# 1) 移除可能冲突的旧包
-sudo apt-get remove -y docker docker-engine docker.io containerd runc
-
-# 2) 安装依赖并添加 Docker 官方 apt 源
-sudo apt-get update
-sudo apt-get install -y ca-certificates curl gnupg
-sudo install -m 0755 -d /etc/apt/keyrings
-curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
-sudo chmod a+r /etc/apt/keyrings/docker.gpg
-echo \
-  "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
-  $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | \
-  sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
-
-# 3) 安装 Docker 引擎 + compose 插件
-sudo apt-get update
-sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
-
-# 4) 把当前用户加入 docker 组(之后免 sudo)
-sudo usermod -aG docker $USER
-
-# 5) 启动 docker 服务(systemd 已启用)
-sudo systemctl enable --now docker
-```
-
-完成后**新开一个 WSL 终端**(让 `docker` 组生效),执行验证:
+agent 验证命令:
 
 ```bash
-docker --version        # 期望 Docker version 2x.x
-docker compose version  # 期望 Docker Compose version v2.x
-sudo systemctl is-active docker   # 期望 active
-docker ps               # 期望无报错(空列表即可)
+wsl -e bash -lc "docker info --format '{{.ServerVersion}}'"
+# 期望:输出 ServerVersion(如 29.6.2),而非 "could not be found"
 ```
-
-把验证输出告诉 agent(或直接回复"已装好"),由 agent 继续 Step 2 及后续步骤。
 
 - [ ] **Step 2(agent 执行):写 docker-compose.yml**
 
