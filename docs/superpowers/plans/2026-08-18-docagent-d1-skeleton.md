@@ -11,14 +11,14 @@
 ## Global Constraints
 
 - 本计划所有命令在 **WSL(Ubuntu-22.04)** 内执行。仓库路径 `/home/sjx_0/project/shixi`。
-- Python 环境:conda env `docagent`(Python 3.11)。所有 python/pytest/alembic 命令带前缀:`source ~/miniconda3/etc/profile.d/conda.sh && conda activate docagent && <cmd>`。
-- 未创建 `docagent` 环境前,先执行:`conda create -n docagent python=3.11 -y`。
-- **前置条件(用户操作,agent 无法代做)**:启动 Docker Desktop,并在 Settings → Resources → WSL Integration 中启用 `Ubuntu-22.04` 集成。
+- Python 环境:**conda env `yy`**(Python 3.12,已装 FastAPI 0.139 / langgraph 1.2 / langchain 1.x)。所有 python/pytest/alembic 命令带前缀:`source ~/miniconda3/etc/profile.d/conda.sh && conda activate yy && <cmd>`。**不要创建新环境,不要降级已有包。**
+- 本计划需新增依赖(装进 `yy`,见 Task 1):`SQLAlchemy`、`psycopg[binary]`、`alembic`、`pytest`、`pytest-asyncio`。
+- **Docker:在 WSL 内原生安装 Docker Engine**(非 Docker Desktop 集成)。WSL 已启用 systemd(`/etc/wsl.conf`),满足运行条件。安装命令需 sudo(交互输入密码),**必须由用户本人执行**,见 Task 4。用户装完后,agent 负责验证并继续。
 - `.env`(含密钥)永不提交;提交 `.env.example`。`.gitignore` 已含 `.env`。
 - 本次只起 Postgres + QDrant 两个服务;backend/frontend 容器在 D8 加入 compose。
 - 所有测试只依赖本机/本地基础设施,不调用任何外部 LLM API。
 - 提交信息用 conventional commits(`feat:` / `fix:` / `docs:` / `chore:`)。
-- 版本锁定要求:依赖固定在 `requirements.txt`,按下方 Task 1 给出的版本为准,不得随意升级。
+- 依赖管理:`requirements.txt` 记录直接依赖;已存在于 `yy` 的包按实际版本记录(不强制降级)。
 
 ---
 
@@ -54,34 +54,40 @@ touch backend/app/__init__.py backend/app/core/__init__.py backend/app/api/__ini
       backend/app/protocols/__init__.py backend/app/infrastructure/__init__.py backend/tests/__init__.py
 ```
 
-- [ ] **Step 2: 创建 conda 环境并安装基础依赖**
+- [ ] **Step 2: 确认 `yy` 环境,补齐 D1 依赖**
+
+确认 `yy` 环境可用并查看版本:
 
 ```bash
-cd /home/sjx_0/project/shixi
-source ~/miniconda3/etc/profile.d/conda.sh && conda create -n docagent python=3.11 -y
+source ~/miniconda3/etc/profile.d/conda.sh && conda activate yy
+python --version   # 期望 Python 3.12.x
+pip show fastapi | grep -i version
 ```
 
-将下面的内容写入 `backend/requirements.txt`:
+将下面的内容写入 `backend/requirements.txt`(已存在的包按 `yy` 实际版本记录,不降级;新增的 5 个包按此版本安装):
 
 ```text
-fastapi==0.115.6
-uvicorn[standard]==0.34.0
-pydantic==2.10.4
-pydantic-settings==2.7.0
+# ---- 已存在于 yy 环境(按实际版本)----
+fastapi==0.139.0
+uvicorn[standard]==0.51.0
+pydantic==2.13.4
+pydantic-settings==2.14.2
+httpx==0.28.1
+
+# ---- 本计划新增 ----
 SQLAlchemy==2.0.36
 psycopg[binary]==3.2.3
 alembic==1.14.0
-httpx==0.28.1
 pytest==8.3.4
 pytest-asyncio==0.25.0
 ```
 
-安装:
+安装(只新增,已存在版本会被跳过或保持):
 
 ```bash
-source ~/miniconda3/etc/profile.d/conda.sh && conda activate docagent
+source ~/miniconda3/etc/profile.d/conda.sh && conda activate yy
 pip install -r backend/requirements.txt
-python --version  # 期望输出 Python 3.11.x
+python -c "import sqlalchemy, alembic, psycopg, pytest; print('deps OK')"
 ```
 
 - [ ] **Step 3: 写配置测试(先失败)**
@@ -110,7 +116,7 @@ def test_database_url_assembled():
 
 ```bash
 cd /home/sjx_0/project/shixi/backend
-source ~/miniconda3/etc/profile.d/conda.sh && conda activate docagent
+source ~/miniconda3/etc/profile.d/conda.sh && conda activate yy
 pytest tests/test_config.py -v
 ```
 
@@ -171,7 +177,7 @@ def get_settings() -> Settings:
 
 ```bash
 cd /home/sjx_0/project/shixi/backend
-source ~/miniconda3/etc/profile.d/conda.sh && conda activate docagent
+source ~/miniconda3/etc/profile.d/conda.sh && conda activate yy
 pytest tests/test_config.py -v
 ```
 
@@ -262,7 +268,7 @@ def test_json_formatter_emits_structured_record():
 
 ```bash
 cd /home/sjx_0/project/shixi/backend
-source ~/miniconda3/etc/profile.d/conda.sh && conda activate docagent
+source ~/miniconda3/etc/profile.d/conda.sh && conda activate yy
 pytest tests/test_logging.py -v
 ```
 
@@ -306,7 +312,7 @@ def setup_logging(level: int = logging.INFO) -> None:
 
 ```bash
 cd /home/sjx_0/project/shixi/backend
-source ~/miniconda3/etc/profile.d/conda.sh && conda activate docagent
+source ~/miniconda3/etc/profile.d/conda.sh && conda activate yy
 pytest tests/test_logging.py -v
 ```
 
@@ -355,7 +361,7 @@ def test_health_endpoint():
 
 ```bash
 cd /home/sjx_0/project/shixi/backend
-source ~/miniconda3/etc/profile.d/conda.sh && conda activate docagent
+source ~/miniconda3/etc/profile.d/conda.sh && conda activate yy
 pytest tests/test_health.py -v
 ```
 
@@ -403,7 +409,7 @@ app = create_app()
 
 ```bash
 cd /home/sjx_0/project/shixi/backend
-source ~/miniconda3/etc/profile.d/conda.sh && conda activate docagent
+source ~/miniconda3/etc/profile.d/conda.sh && conda activate yy
 pytest tests/test_health.py -v
 ```
 
@@ -413,7 +419,7 @@ pytest tests/test_health.py -v
 
 ```bash
 cd /home/sjx_0/project/shixi/backend
-source ~/miniconda3/etc/profile.d/conda.sh && conda activate docagent
+source ~/miniconda3/etc/profile.d/conda.sh && conda activate yy
 nohup uvicorn app.main:app --port 8000 > /tmp/uvicorn.log 2>&1 &
 sleep 2
 curl -s http://localhost:8000/api/v1/health
@@ -431,18 +437,59 @@ git commit -m "feat: add FastAPI app factory with health endpoint"
 
 ---
 
-### Task 4: Docker Compose 基础设施(Postgres + QDrant)
+### Task 4: 原生安装 Docker Engine(WSL)+ Compose 基础设施
 
 **Files:**
 - Create: `docker-compose.yml`
 
 **Interfaces:**
 - Consumes: `.env`(Task 1,由 compose 读取做变量替换)
-- Produces: 本地 Postgres(端口 5432)与 QDrant(端口 6333)服务,后续任务与容器(backend/frontend)都依赖
+- Produces: WSL 内可用的 Docker Engine + 本地 Postgres(5432)与 QDrant(6333)服务;后续任务与容器(backend/frontend)都依赖
 
-> ⚠️ 前置条件:先启动 Docker Desktop,并在 Settings → Resources → WSL Integration 勾选 `Ubuntu-22.04`。若 `docker` 命令仍报错,回 WSL 执行 `docker version` 排查。
+> ⚠️ **本任务 Step 1 必须由用户本人执行**(需要 sudo 密码,agent 无法代替)。WSL 已启用 systemd(`/etc/wsl.conf`),满足原生运行条件。
 
-- [ ] **Step 1: 写 docker-compose.yml**
+- [ ] **Step 1(用户执行):在 WSL 内安装 Docker Engine**
+
+在 WSL 终端里执行(遇到密码提示输入你的 sudo 密码):
+
+```bash
+# 1) 移除可能冲突的旧包
+sudo apt-get remove -y docker docker-engine docker.io containerd runc
+
+# 2) 安装依赖并添加 Docker 官方 apt 源
+sudo apt-get update
+sudo apt-get install -y ca-certificates curl gnupg
+sudo install -m 0755 -d /etc/apt/keyrings
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+sudo chmod a+r /etc/apt/keyrings/docker.gpg
+echo \
+  "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
+  $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | \
+  sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+
+# 3) 安装 Docker 引擎 + compose 插件
+sudo apt-get update
+sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+
+# 4) 把当前用户加入 docker 组(之后免 sudo)
+sudo usermod -aG docker $USER
+
+# 5) 启动 docker 服务(systemd 已启用)
+sudo systemctl enable --now docker
+```
+
+完成后**新开一个 WSL 终端**(让 `docker` 组生效),执行验证:
+
+```bash
+docker --version        # 期望 Docker version 2x.x
+docker compose version  # 期望 Docker Compose version v2.x
+sudo systemctl is-active docker   # 期望 active
+docker ps               # 期望无报错(空列表即可)
+```
+
+把验证输出告诉 agent(或直接回复"已装好"),由 agent 继续 Step 2 及后续步骤。
+
+- [ ] **Step 2(agent 执行):写 docker-compose.yml**
 
 创建仓库根目录 `docker-compose.yml`:
 
@@ -478,7 +525,7 @@ volumes:
   qdrant_storage:
 ```
 
-- [ ] **Step 2: 启动并验证 Postgres 与 QDrant**
+- [ ] **Step 3(agent 执行):启动并验证 Postgres 与 QDrant**
 
 ```bash
 cd /home/sjx_0/project/shixi
@@ -495,7 +542,7 @@ curl -s http://localhost:6333/collections
 # 期望:{"result":{"collections":[]},"status":"ok",...}
 ```
 
-- [ ] **Step 3: 提交**
+- [ ] **Step 4: 提交**
 
 ```bash
 cd /home/sjx_0/project/shixi
@@ -547,7 +594,7 @@ def test_db_connectivity_and_version_table():
 
 ```bash
 cd /home/sjx_0/project/shixi/backend
-source ~/miniconda3/etc/profile.d/conda.sh && conda activate docagent
+source ~/miniconda3/etc/profile.d/conda.sh && conda activate yy
 pytest tests/test_db_session.py -v
 ```
 
@@ -591,7 +638,7 @@ def get_db() -> Generator[Session, None, None]:
 
 ```bash
 cd /home/sjx_0/project/shixi/backend
-source ~/miniconda3/etc/profile.d/conda.sh && conda activate docagent
+source ~/miniconda3/etc/profile.d/conda.sh && conda activate yy
 alembic init alembic
 ```
 
@@ -653,7 +700,7 @@ else:
 
 ```bash
 cd /home/sjx_0/project/shixi/backend
-source ~/miniconda3/etc/profile.d/conda.sh && conda activate docagent
+source ~/miniconda3/etc/profile.d/conda.sh && conda activate yy
 alembic revision -m "baseline"   # 空迁移,记录版本起点
 alembic upgrade head
 alembic current   # 期望输出:0001 (head) 或类似
@@ -663,7 +710,7 @@ alembic current   # 期望输出:0001 (head) 或类似
 
 ```bash
 cd /home/sjx_0/project/shixi/backend
-source ~/miniconda3/etc/profile.d/conda.sh && conda activate docagent
+source ~/miniconda3/etc/profile.d/conda.sh && conda activate yy
 pytest tests/test_db_session.py -v
 ```
 
@@ -691,7 +738,7 @@ git commit -m "feat: add sqlalchemy session and alembic baseline migration"
 
 ```bash
 cd /home/sjx_0/project/shixi/backend
-source ~/miniconda3/etc/profile.d/conda.sh && conda activate docagent
+source ~/miniconda3/etc/profile.d/conda.sh && conda activate yy
 pytest -v
 ```
 
