@@ -1,0 +1,29 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: docagent-postgres
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-docagent}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-docagent_dev_password}
+      POSTGRES_DB: ${POSTGRES_DB:-docagent}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-docagent}"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  qdrant:
+    image: qdrant/qdrant:v1.13.0
+    container_name: docagent-qdrant
+    ports:
+      - "${QDRANT_PORT:-6333}:6333"
+    volumes:
+      - qdrant_storage:/qdrant/storage
+
+volumes:
+  pgdata:
+  qdrant_storage:
