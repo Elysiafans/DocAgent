@@ -1,6 +1,6 @@
 # DocAgent D7 —— Vue 3 前端(SSE 对话 + 知识库 + 可观测) 实现计划
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [x]`) syntax for tracking.
 
 **Goal:** 用 Vue 3 + Vite 实现单页前端,直接对接后端全部能力:登录/注册、知识库管理(建库/上传文档/状态轮询/删除)、**SSE 流式 agent 对话**(实时 token、路由徽标、工具调用、溯源 sources)、A2UI 卡片渲染、task_runs 可观测。纯 fetch + 原生 CSS,不引 UI 框架/router/pinia/axios,保持依赖最小。
 
@@ -35,9 +35,9 @@
 - `vite.config.js`:插件 vue;`server.proxy`:`/api`、`/mcp`、`/a2a` → `http://localhost:8000`
 - `App.vue`:state `{token, view, user}`;未登录显示 `AuthView`;已登录顶栏(知识库/对话/任务/退出)
 
-- [ ] **Step 1: 写 package.json / vite.config / index.html / main.js / style.css / App.vue 骨架**
-- [ ] **Step 2: `npm install` 成功;`npm run build` 成功**(先保证编译链路通)
-- [ ] **Step 3: 提交 `chore: scaffold vite vue frontend`**
+- [x] **Step 1: 写 package.json / vite.config / index.html / main.js / style.css / App.vue 骨架**
+- [x] **Step 2: `npm install` 成功;`npm run build` 成功**(先保证编译链路通)
+- [x] **Step 3: 提交 `chore: scaffold vite vue frontend`**
 
 ### Task 2: API 封装 + 登录注册
 
@@ -49,9 +49,9 @@
 - `api.js`:`token` 存 localStorage;`request(path,{method,body,form})` 自动带 Bearer 与 JSON/FormData;导出 `login/register/listKbs/createKb/uploadDoc/listDocs/deleteDoc/listTaskRuns/listMemories/addMemory/streamChat`(SSE,回调 onEvent)
 - `AuthView.vue`:登录/注册切换表单;成功后 `onAuth(token)` 进入主界面
 
-- [ ] **Step 1: 写 api.js(Auth + KB + docs + tasks + memories + streamChat SSE 解析)**
-- [ ] **Step 2: 写 AuthView.vue**
-- [ ] **Step 3: 跑 `npm run build` 确认编译通过;提交 `feat: add frontend api client and auth view`**
+- [x] **Step 1: 写 api.js(Auth + KB + docs + tasks + memories + streamChat SSE 解析)**
+- [x] **Step 2: 写 AuthView.vue**
+- [x] **Step 3: 跑 `npm run build` 确认编译通过;提交 `feat: add frontend api client and auth view`**
 
 ### Task 3: 知识库管理视图
 
@@ -63,8 +63,8 @@
 - 上传:FormData POST `/knowledge_bases/{id}/documents`;每 1.5s 轮询文档状态直到 ready/failed
 - 删除文档;退出登录清理
 
-- [ ] **Step 1: 写 KbView.vue(建库/选库/上传/状态轮询/删除)**
-- [ ] **Step 2: build 通过,提交 `feat: add knowledge base management view`**
+- [x] **Step 1: 写 KbView.vue(建库/选库/上传/状态轮询/删除)**
+- [x] **Step 2: build 通过,提交 `feat: add knowledge base management view`**
 
 ### Task 4: SSE 对话视图(A2A 前端主角)
 
@@ -77,8 +77,8 @@
 - "卡片视图"开关:`POST /a2ui/render`(该库+问题)拉取 A2UI 卡片 JSON,以 JSON 预览展示(对接 D6)
 - 历史:显示当前会话 messages(本地数组)
 
-- [ ] **Step 1: 写 ChatView.vue(SSE 解析 + 渲染 token/route/tool/sources + A2UI 卡片)**
-- [ ] **Step 2: build 通过,提交 `feat: add SSE agent chat view with sources`**
+- [x] **Step 1: 写 ChatView.vue(SSE 解析 + 渲染 token/route/tool/sources + A2UI 卡片)**
+- [x] **Step 2: build 通过,提交 `feat: add SSE agent chat view with sources`**
 
 ### Task 5: 任务可观测视图
 
@@ -89,11 +89,11 @@
 - GET `/task_runs` 列表:type/status/started/finished/error
 - 点开某条:GET `/task_runs/{id}` 展示 `trace.events`(route/node/token/tool 时间线)
 
-- [ ] **Step 1: 写 TasksView.vue(列表 + trace 时间线)**
-- [ ] **Step 2: build 通过,提交 `feat: add task runs observability view`**
+- [x] **Step 1: 写 TasksView.vue(列表 + trace 时间线)**
+- [x] **Step 2: build 通过,提交 `feat: add task runs observability view`**
 
 ### Task 6: D7 收尾
 
-- [ ] **Step 1: `npm run build` 全绿;`npm run preview` 起服务,curl 首页 200 且含 `#app`**
-- [ ] **Step 2: 起后端(uvicorn)+ 起 vite dev,curl 经代理的 `/api/v1/health` 通**
-- [ ] **Step 3: 检查工作区(dist/node_modules 已忽略)、提交收尾(若有遗漏)**
+- [x] **Step 1: `npm run build` 全绿;`npm run preview` 起服务,curl 首页 200 且含 `#app`**
+- [x] **Step 2: 起后端(uvicorn)+ 起 vite dev,curl 经代理的 `/api/v1/health` 通**
+- [x] **Step 3: 检查工作区(dist/node_modules 已忽略)、提交收尾(若有遗漏)**
