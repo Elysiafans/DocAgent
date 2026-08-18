@@ -30,6 +30,11 @@ class Settings(BaseSettings):
 
     # QDrant
     QDRANT_URL: str = "http://localhost:6333"
+    QDRANT_COLLECTION: str = "docagent_knowledge"
+
+    # 嵌入参数
+    EMBEDDING_MODEL_DIM: int = 1024  # bge-m3
+    EMBEDDING_BATCH_SIZE: int = 32
 
     # LLM / 嵌入 / 重排提供商(D3/D5 使用,先留空)
     DEEPSEEK_API_KEY: str = ""

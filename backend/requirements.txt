@@ -19,7 +19,8 @@ bcrypt==4.0.1
 email-validator==2.2.0
 
 # ---- D3 新增(文档处理 + RAG 底座)----
-qdrant-client==1.19.0
+# 与 docker-compose 的 qdrant:v1.13.0 服务端匹配(客户端过低会告警不兼容)
+qdrant-client==1.13.3
 langchain-core==1.5.2
 langchain-text-splitters==1.1.2
 langchain-openai==1.4.1
