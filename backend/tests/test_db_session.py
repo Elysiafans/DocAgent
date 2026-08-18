@@ -1,6 +1,5 @@
-from sqlalchemy import text
-
 from app.db.session import SessionLocal
+from sqlalchemy import text
 
 
 def test_db_connectivity_and_version_table():

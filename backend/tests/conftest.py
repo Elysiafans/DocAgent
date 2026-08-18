@@ -4,16 +4,15 @@ from pathlib import Path
 # 必须在导入任何 app 模块之前设置,让 get_settings() 读到测试库
 os.environ["POSTGRES_DB"] = "docagent_test"
 
-import pytest  # noqa: E402
-from alembic import command  # noqa: E402
-from alembic.config import Config  # noqa: E402
-from fastapi.testclient import TestClient  # noqa: E402
-from sqlalchemy import create_engine, text  # noqa: E402
-
-from app import models  # noqa: E402, F401  确保模型注册到 Base.metadata
-from app.db.base import Base  # noqa: E402
-from app.db.session import engine  # noqa: E402
-from app.main import app  # noqa: E402
+import pytest
+from alembic import command
+from alembic.config import Config
+from app import models  # noqa: F401  确保模型注册到 Base.metadata
+from app.db.base import Base
+from app.db.session import engine
+from app.main import app
+from fastapi.testclient import TestClient
+from sqlalchemy import create_engine, text
 
 TEST_DB_NAME = "docagent_test"
 _BACKEND_DIR = Path(__file__).resolve().parent.parent

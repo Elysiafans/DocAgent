@@ -6,7 +6,8 @@
 """
 from __future__ import annotations
 
-from typing import Any, Callable
+from collections.abc import Callable
+from typing import Any
 
 from app.protocols.jsonrpc import (
     INTERNAL_ERROR,
@@ -27,7 +28,7 @@ class McpServer:
     NAME = "docagent-mcp"
     VERSION = "0.1.0"
     PROTOCOL_VERSION = "2025-03-26"
-    SUPPORTED_VERSIONS = {"2025-03-26", "2025-06-18"}
+    SUPPORTED_VERSIONS = ("2025-03-26", "2025-06-18")
 
     def __init__(self, tool_specs: list[dict], ctx_factory: CtxFactory | None = None):
         self._tools: dict[str, dict] = {s["name"]: s for s in tool_specs}
@@ -57,7 +58,7 @@ class McpServer:
             raise JsonRpcError(METHOD_NOT_FOUND, f"Method not found: {method}")
         except JsonRpcError as e:
             return error(rid, e.code, e.message)
-        except Exception as e:  # noqa: BLE001
+        except Exception as e:
             return error(rid, INTERNAL_ERROR, f"{type(e).__name__}: {e}")
 
     # ---- 协议方法 ----
@@ -100,6 +101,6 @@ class McpServer:
             text = spec["call"](ctx, arguments)
         except KeyError as e:
             raise JsonRpcError(INVALID_PARAMS, f"Missing argument: {e.args[0]}") from e
-        except Exception as e:  # noqa: BLE001
+        except Exception as e:
             raise JsonRpcError(INTERNAL_ERROR, f"{type(e).__name__}: {e}") from e
         return {"content": [{"type": "text", "text": str(text)}], "isError": False}

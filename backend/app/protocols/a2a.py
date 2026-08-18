@@ -40,5 +40,5 @@ class A2aServer:
             raise JsonRpcError(METHOD_NOT_FOUND, f"Method not found: {method}")
         except JsonRpcError as e:
             return error(rid, e.code, e.message)
-        except Exception as e:  # noqa: BLE001
+        except Exception as e:
             return error(rid, -32000, f"{type(e).__name__}: {e}")

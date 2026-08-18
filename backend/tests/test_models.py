@@ -1,6 +1,5 @@
-from sqlalchemy import inspect
-
 from app.db.session import engine
+from sqlalchemy import inspect
 
 EXPECTED_TABLES = {
     "alembic_version",

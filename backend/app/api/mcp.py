@@ -51,7 +51,7 @@ async def mcp_endpoint(
 ):
     try:
         payload = await request.json()
-    except Exception:  # noqa: BLE001  body 非 JSON
+    except Exception:
         return JSONResponse(
             {
                 "jsonrpc": "2.0",

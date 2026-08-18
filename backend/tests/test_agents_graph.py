@@ -1,9 +1,9 @@
-from langchain_core.messages import AIMessage, HumanMessage
-
-import app.agents.routes as routes
+from app.agents import routes
 from app.agents.graph import build_graph
 from app.rag.embeddings import fake_embed_texts
 from app.rag.vector_store import QdrantVectorStore
+from langchain_core.messages import AIMessage, HumanMessage
+
 from tests.fake_model import FakeToolCallingModel
 
 TEST_COLLECTION = "docagent_test_collection"
@@ -11,7 +11,6 @@ TEST_COLLECTION = "docagent_test_collection"
 
 def _tools(kb_id=1):
     from app.agents.tools import AgentContext, build_tools
-
     from app.rag.client import get_qdrant
 
     client = get_qdrant()

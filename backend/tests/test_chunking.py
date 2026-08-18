@@ -1,5 +1,4 @@
 import pytest
-
 from app.rag.chunking import chunk_document
 
 

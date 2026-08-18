@@ -8,11 +8,11 @@ import json
 
 import app.services.agent_service as agent_svc
 import app.services.ingestion_service as ing
+from app.rag.embeddings import fake_embed_texts
+from app.rag.vector_store import QdrantVectorStore
 from langchain_core.messages import AIMessage, SystemMessage, ToolMessage
 from langchain_core.outputs import ChatGeneration, ChatResult
 
-from app.rag.embeddings import fake_embed_texts
-from app.rag.vector_store import QdrantVectorStore
 from tests.fake_model import FakeToolCallingModel
 
 TEST_COLLECTION = "docagent_test_collection"

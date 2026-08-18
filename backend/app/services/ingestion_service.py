@@ -55,7 +55,7 @@ def ingest_document(db: Session, doc: Document, raw: bytes) -> None:
         doc.chunk_count = n
         doc.error = None
         db.commit()
-    except Exception as e:  # noqa: BLE001
+    except Exception as e:
         db.rollback()
         doc.status = "failed"
         doc.error = str(e)

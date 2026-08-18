@@ -1,6 +1,7 @@
+from collections.abc import Generator
 from dataclasses import dataclass
 from datetime import datetime, timezone
-from typing import Any, Generator
+from typing import Any
 
 from fastapi import HTTPException, status
 from sqlalchemy import select
@@ -175,7 +176,7 @@ def stream_agent_chat(
                 route = ev["route"]
 
             trace = dict(run_row.trace or {})
-            trace["events"] = trace.get("events", []) + [ev]
+            trace["events"] = [*trace.get("events", []), ev]
             run_row.trace = trace
             db.add(run_row)
             db.commit()  # 增量提交:流式中途即可观测 trace
@@ -205,7 +206,7 @@ def stream_agent_chat(
             "run_id": run_row.id,
             "answer": answer,
         }
-    except Exception as e:  # noqa: BLE001
+    except Exception as e:
         db.rollback()
         run_row.status = "failed"
         run_row.error = f"{type(e).__name__}: {e}"

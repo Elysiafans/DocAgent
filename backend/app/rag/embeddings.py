@@ -59,7 +59,7 @@ class SiliconFlowEmbeddingProvider:
                 data = resp.json()["data"]
                 data.sort(key=lambda d: d["index"])
                 return [d["embedding"] for d in data]
-            except Exception as e:  # noqa: BLE001
+            except Exception as e:
                 last_err = e
                 if attempt == retries:
                     raise RuntimeError(

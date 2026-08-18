@@ -1,7 +1,8 @@
 import ast
 import operator
+from collections.abc import Callable
 from dataclasses import dataclass, field
-from typing import Any, Callable
+from typing import Any
 
 from langchain_core.tools import tool
 from sqlalchemy import select
@@ -63,7 +64,7 @@ def _web_search_impl(query: str) -> str:
         return "\n".join(
             f"- {r.get('title', '')}: {r.get('body', '')[:120]}" for r in results
         )
-    except Exception as e:  # noqa: BLE001
+    except Exception as e:
         return f"联网搜索暂不可用(离线/超时):{type(e).__name__}"
 
 

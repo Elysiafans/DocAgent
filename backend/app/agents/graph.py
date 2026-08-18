@@ -1,10 +1,13 @@
 import warnings
-from typing import TypedDict
+from typing import TYPE_CHECKING, Generator, TypedDict
 
 from langchain_core.language_models.chat_models import BaseChatModel
 from langchain_core.messages import AIMessage, HumanMessage, SystemMessage
 from langgraph.checkpoint.memory import InMemorySaver
 from langgraph.graph import END, START, StateGraph
+
+if TYPE_CHECKING:  # 前向引用仅用于注解,运行时不需要
+    from langgraph.graph.state import CompiledStateGraph
 
 # create_react_agent 为 langgraph-prebuilt 稳定 API;
 # V2 将迁移到 langchain.agents.create_agent(langchain 包未装,保留旧 API)。
@@ -53,7 +56,6 @@ def build_graph(
     memory_context: 用户长期记忆文本块;非空时追加到 Supervisor 与各 agent 的
     SystemPrompt,让 agent 在作答时参考已知偏好/事实。
     """
-    from langgraph.graph.state import CompiledStateGraph
 
     def _with_memory(base: str) -> str:
         return f"{base}\n\n{memory_context}" if memory_context else base

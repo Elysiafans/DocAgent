@@ -1,0 +1,23 @@
+# DocAgent ruff 配置 —— 本地 lint 与 GitHub Actions CI(lint job)共用。
+# 规则集:pycodestyle(E)+ pyflakes(F)+ import 排序(I)+ bugbear(B)+ ruff 专属(RUF)。
+# - E501(行长)显式忽略:中文注释/文档串使行长判断不可靠,项目以 100 列软约束。
+# - RUF001/002/003(混淆字符)忽略:项目为中文代码,全角标点(，；！？)是刻意用法。
+# - alembic/versions 为自动生成的迁移文件,不参与 lint。
+target-version = "py312"
+line-length = 100
+exclude = ["frontend", "backend/.venv"]
+extend-exclude = ["backend/alembic/versions"]
+
+[lint]
+select = ["E", "F", "I", "B", "RUF"]
+ignore = ["E501", "RUF001", "RUF002", "RUF003"]
+
+# FastAPI 惯用法:Depends()/Query()/Body()/File() 等依赖注入允许出现在函数默认参数中。
+[lint.flake8-bugbear]
+extend-immutable-calls = [
+    "fastapi.Depends",
+    "fastapi.Query",
+    "fastapi.Body",
+    "fastapi.Header",
+    "fastapi.File",
+]

@@ -139,9 +139,9 @@ def test_mcp_http_sse_mode(client, monkeypatch):
     store = _fake_store()
     monkeypatch.setattr(agent_svc, "_make_vector_store", lambda kb_id: store)
     h = _auth_headers(client)
-    kb_id = client.post(
+    client.post(
         "/api/v1/knowledge_bases", json={"name": "mcp库2"}, headers=h
-    ).json()["id"]
+    )
     with client.stream(
         "POST",
         "/mcp",

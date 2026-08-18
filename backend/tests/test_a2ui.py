@@ -2,11 +2,11 @@ from types import SimpleNamespace
 
 import app.services.agent_service as agent_svc
 import app.services.ingestion_service as ing
-from langchain_core.messages import AIMessage
-
 from app.protocols import a2ui
 from app.rag.embeddings import fake_embed_texts
 from app.rag.vector_store import QdrantVectorStore
+from langchain_core.messages import AIMessage
+
 from tests.fake_model import FakeToolCallingModel
 
 TEST_COLLECTION = "docagent_test_collection"

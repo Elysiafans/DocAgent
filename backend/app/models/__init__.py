@@ -8,8 +8,8 @@ from app.models.task_run import TaskRun
 from app.models.user import User
 
 __all__ = [
-    "DocChunk",
     "Conversation",
+    "DocChunk",
     "Document",
     "KnowledgeBase",
     "Memory",

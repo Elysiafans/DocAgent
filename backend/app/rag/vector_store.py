@@ -1,5 +1,6 @@
+from collections.abc import Callable
 from dataclasses import dataclass
-from typing import Any, Callable
+from typing import Any
 
 from qdrant_client import models
 
@@ -51,7 +52,7 @@ class QdrantVectorStore:
         texts = [c.content for c in chunks]
         vectors = self.embedder(texts)
         points = []
-        for c, vec in zip(chunks, vectors):
+        for c, vec in zip(chunks, vectors, strict=False):
             indices, values = build_sparse_vector(c.content)
             points.append(
                 models.PointStruct(

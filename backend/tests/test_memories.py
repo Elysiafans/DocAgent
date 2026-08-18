@@ -1,9 +1,9 @@
 import app.services.agent_service as agent_svc
 import app.services.ingestion_service as ing
-from langchain_core.messages import AIMessage
-
 from app.rag.embeddings import fake_embed_texts
 from app.rag.vector_store import QdrantVectorStore
+from langchain_core.messages import AIMessage
+
 from tests.fake_model import FakeToolCallingModel
 
 TEST_COLLECTION = "docagent_test_collection"
@@ -50,11 +50,10 @@ def test_memory_delete_other_user_404(client):
 
 
 def test_memory_service_crud_and_context():
-    from sqlalchemy.orm import Session
-
     from app.db.session import SessionLocal
     from app.models import User
     from app.services import memory_service
+    from sqlalchemy.orm import Session
 
     db: Session = SessionLocal()
     try:

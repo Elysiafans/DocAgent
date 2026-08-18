@@ -2,9 +2,8 @@ import io
 
 import docx
 import pytest
-from pypdf import PdfWriter
-
 from app.rag.parsers import parse_document
+from pypdf import PdfWriter
 
 
 def _make_pdf() -> bytes:

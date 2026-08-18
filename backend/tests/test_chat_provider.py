@@ -1,3 +1,5 @@
+from typing import ClassVar
+
 from app.rag.chat_provider import DeepSeekChatProvider
 
 
@@ -6,7 +8,7 @@ def test_deepseek_complete_uses_v4_flash(monkeypatch):
     calls = []
 
     class FakeResp:
-        choices = [
+        choices: ClassVar = [
             type("C", (), {"message": type("M", (), {"content": "根据资料[1],答案是……"})})()
         ]
 
