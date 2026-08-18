@@ -27,3 +27,12 @@ langchain-openai==1.4.1
 openai==2.48.0
 pypdf==6.16.1
 python-docx==1.2.0
+
+# ---- D5 新增(多智能体编排 + SSE)----
+# 与 yy 环境实际版本对齐;create_react_agent 为 langgraph-prebuilt 稳定 API
+langgraph==1.2.10
+langgraph-checkpoint==4.1.1
+langgraph-prebuilt==1.1.0
+langgraph-sdk==0.4.2
+langsmith==0.10.11
+duckduckgo-search==8.1.1
