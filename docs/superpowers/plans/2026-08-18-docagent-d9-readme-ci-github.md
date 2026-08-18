@@ -38,8 +38,8 @@
 - 配置说明(.env.example)
 - 未来计划
 
-- [ ] **Step 1: 写 README.md(含 Mermaid 架构图 + 对照表)**
-- [ ] **Step 2: 提交 `docs: add comprehensive readme`**
+- [x] **Step 1: 写 README.md(含 Mermaid 架构图 + 对照表)**
+- [x] **Step 2: 提交 `docs: add comprehensive readme`**
 
 ### Task 2: GitHub Actions CI
 
@@ -52,9 +52,9 @@
 - Job `docker-build`:build backend + frontend 镜像
 - Job `lint`(视 ruff 结果):`ruff check backend/app backend/tests`
 
-- [ ] **Step 1: 写 ci.yml(services + 多 job)**
-- [ ] **Step 2: 本地等价验证(pytest/npm build 已绿;ruff 视结果)**
-- [ ] **Step 3: 提交 `ci: add github actions workflow`**
+- [x] **Step 1: 写 ci.yml(services + 多 job)**
+- [x] **Step 2: 本地等价验证(pytest/npm build 已绿;ruff 已修至全绿)**
+- [x] **Step 3: 提交 `ci: add github actions workflow`**
 
 ### Task 3: 身份重写 + 推送 GitHub
 
