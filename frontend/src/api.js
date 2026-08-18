@@ -56,6 +56,8 @@ export const createKb = (name, description = '') =>
     method: 'POST',
     body: { name, description },
   })
+export const deleteKb = (kbId) =>
+  request(`/api/v1/knowledge_bases/${kbId}`, { method: 'DELETE' })
 export const listDocs = (kbId) =>
   request(`/api/v1/knowledge_bases/${kbId}/documents`)
 export const uploadDoc = (kbId, file) => {
