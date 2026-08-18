@@ -1,3 +1,5 @@
+# DocAgent 全链路:frontend(nginx) + backend(uvicorn) + postgres + qdrant
+# 用法:docker compose up -d --build;前端 http://localhost:5173
 services:
   postgres:
     image: postgres:16-alpine
@@ -23,6 +25,53 @@ services:
       - "${QDRANT_PORT:-6333}:6333"
     volumes:
       - qdrant_storage:/qdrant/storage
+
+  backend:
+    build: ./backend
+    container_name: docagent-backend
+    environment:
+      # 覆盖默认 localhost → compose 服务名
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_USER: ${POSTGRES_USER:-docagent}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-docagent_dev_password}
+      POSTGRES_DB: ${POSTGRES_DB:-docagent}
+      QDRANT_URL: http://qdrant:6333
+      QDRANT_COLLECTION: ${QDRANT_COLLECTION:-docagent_knowledge}
+      # 密钥/提供商从 .env 注入(镜像内不烧录)
+      SECRET_KEY: ${SECRET_KEY:-dev-secret-change-me-in-prod}
+      DEEPSEEK_API_KEY: ${DEEPSEEK_API_KEY:-}
+      SILICONFLOW_API_KEY: ${SILICONFLOW_API_KEY:-}
+      DEBUG: "false"
+    ports:
+      - "${BACKEND_PORT:-8000}:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      qdrant:
+        condition: service_started
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request;urllib.request.urlopen('http://localhost:8000/api/v1/health')"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 15s
+    stop_grace_period: 30s
+
+  frontend:
+    build: ./frontend
+    container_name: docagent-frontend
+    ports:
+      - "${FRONTEND_PORT:-5173}:80"
+    depends_on:
+      backend:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost/ >/dev/null 2>&1 || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+    stop_grace_period: 10s
 
 volumes:
   pgdata:
