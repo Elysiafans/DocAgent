@@ -1,12 +1,23 @@
-from typing import Callable
+from dataclasses import dataclass
+from typing import Any, Callable
 
 from qdrant_client import models
 
 from app.core.config import get_settings
 from app.rag.chunking import ChunkRecord
 from app.rag.client import get_qdrant
+from app.rag.sparse import build_sparse_vector
 
 Embedder = Callable[[list[str]], list[list[float]]]
+
+
+@dataclass
+class SearchHit:
+    doc_id: int
+    chunk_index: int
+    content: str
+    score: float
+    meta: dict[str, Any]
 
 
 class QdrantVectorStore:
@@ -41,18 +52,14 @@ class QdrantVectorStore:
         vectors = self.embedder(texts)
         points = []
         for c, vec in zip(chunks, vectors):
-            # 稀疏向量:演示级词袋(按空格/标点切分),D4 打磨
-            tokens: dict[str, int] = {}
-            for tok in c.content.replace("。", " ").replace(",", " ").split():
-                tokens[tok] = tokens.get(tok, 0) + 1
+            indices, values = build_sparse_vector(c.content)
             points.append(
                 models.PointStruct(
                     id=self._point_id(doc_id, c.index),
                     vector={
                         "dense": vec,
                         "sparse": models.SparseVector(
-                            indices=[hash(t) & 0xFFFFFFFF for t in tokens],
-                            values=[float(v) for v in tokens.values()],
+                            indices=indices, values=values
                         ),
                     },
                     payload={
@@ -95,6 +102,65 @@ class QdrantVectorStore:
             ),
             exact=True,
         ).count
+
+    def search(
+        self, query_text: str, kb_id: int, top_k: int = 20, hybrid: bool = True
+    ) -> list[SearchHit]:
+        """混合检索:稠密(bge-m3)+ 稀疏(BM25)prefetch,原生 RRF 融合,按 kb_id 过滤。"""
+        self.ensure_collection()
+        dense = self.embedder([query_text])[0]
+        kb_filter = models.Filter(
+            must=[
+                models.FieldCondition(
+                    key="kb_id", match=models.MatchValue(value=kb_id)
+                )
+            ]
+        )
+        if hybrid:
+            s_idx, s_vals = build_sparse_vector(query_text)
+            prefetch = [
+                models.Prefetch(
+                    query=dense, using="dense", limit=top_k, filter=kb_filter
+                )
+            ]
+            if s_idx:
+                prefetch.append(
+                    models.Prefetch(
+                        query=models.SparseVector(indices=s_idx, values=s_vals),
+                        using="sparse",
+                        limit=top_k,
+                        filter=kb_filter,
+                    )
+                )
+            resp = self._client.query_points(
+                collection_name=self.collection,
+                prefetch=prefetch,
+                query=models.FusionQuery(fusion=models.Fusion.RRF),
+                limit=top_k,
+                with_payload=True,
+            )
+        else:
+            resp = self._client.query_points(
+                collection_name=self.collection,
+                query=dense,
+                using="dense",
+                query_filter=kb_filter,
+                limit=top_k,
+                with_payload=True,
+            )
+        hits: list[SearchHit] = []
+        for p in resp.points:
+            pl = p.payload or {}
+            hits.append(
+                SearchHit(
+                    doc_id=pl["doc_id"],
+                    chunk_index=pl["chunk_index"],
+                    content=pl["content"],
+                    score=float(p.score),
+                    meta=pl,
+                )
+            )
+        return hits
 
     @staticmethod
     def _point_id(doc_id: int, index: int) -> int:

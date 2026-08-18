@@ -46,3 +46,22 @@ def test_ensure_collection_idempotent():
     store = _make_store()
     store.ensure_collection()  # 第二次调用不报错
     assert get_qdrant().collection_exists(TEST_COLLECTION)
+
+
+def test_search_finds_relevant_chunk():
+    store = _make_store()
+    store.upsert_document(42, 1, _chunks())
+    hits = store.search("chunk 1", 1, top_k=5)
+    assert hits and hits[0].doc_id == 42
+    assert hits[0].content == "chunk 1"
+    # kb_id 过滤:别的库查不到
+    assert store.search("chunk 1", 999, top_k=5) == []
+
+
+def test_search_hybrid_and_dense_agree_on_top():
+    store = _make_store()
+    store.upsert_document(42, 1, _chunks())
+    hybrid = store.search("chunk 1", 1, top_k=5, hybrid=True)
+    dense = store.search("chunk 1", 1, top_k=5, hybrid=False)
+    assert hybrid and dense
+    assert hybrid[0].content == "chunk 1" == dense[0].content
