@@ -7,10 +7,9 @@ from alembic import context
 # 确保能 import app 包(无论从哪个目录执行 alembic)
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
+from app import models  # noqa: F401  确保模型注册到 Base.metadata
 from app.core.config import get_settings
 from app.db.base import Base
-
-from app import models  # noqa: F401  确保模型注册到 Base.metadata
 
 config = context.config
 
