@@ -8,6 +8,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.models import Document, KnowledgeBase, User
+from app.protocols import skills as skills_registry
 from app.rag.reranker import Reranker
 from app.rag.retrieval import assemble_context, retrieve
 from app.rag.vector_store import QdrantVectorStore
@@ -116,6 +117,15 @@ def build_tools(ctx: AgentContext) -> list:
         return _web_search_impl(query)
 
     @tool
+    def load_skill(skill_name: str) -> str:
+        """加载一个 Agent Skill(SKILL.md 技能说明),返回其内容供遵循执行。"""
+        try:
+            return skills_registry.load_skill(skill_name)
+        except KeyError:
+            available = ", ".join(skills_registry.list_skill_names())
+            return f"未找到技能 {skill_name};可用技能: {available or '无'}"
+
+    @tool
     def compare_documents(query: str, topics: list[str] | None = None) -> str:
         """对比分析:对每个主题分别检索并汇总,给出多角度对比结果。"""
         store = ctx.store_factory(ctx.kb.id)
@@ -144,4 +154,10 @@ def build_tools(ctx: AgentContext) -> list:
             sections.append(f"【{topic}】\n{assemble_context(chunks, doc_names)}")
         return "\n\n".join(sections) or "未检索到相关内容"
 
-    return [knowledge_search, calculator, web_search, compare_documents]
+    return [
+        knowledge_search,
+        calculator,
+        web_search,
+        compare_documents,
+        load_skill,
+    ]
