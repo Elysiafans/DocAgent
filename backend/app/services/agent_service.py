@@ -58,6 +58,17 @@ class PreparedRun:
     tools_by_agent: dict[str, list]
     llm: Any
     thread_id: str
+    memory_context: str = ""
+
+
+@dataclass
+class AskResult:
+    """同步(非流式)agent 问答结果(A2A / A2UI 复用)。"""
+
+    answer: str
+    conversation_id: int
+    run_id: int
+    sources: list[dict]
 
 
 def prepare_agent_chat(
@@ -95,6 +106,33 @@ def prepare_agent_chat(
     )
 
 
+def ask(db: Session, user: User, payload: AgentChatRequest) -> AskResult:
+    """同步跑完整 agent 图,返回最终回答 + 溯源(A2A / A2UI 复用)。"""
+    prepared = prepare_agent_chat(db, user, payload)
+    answer = ""
+    conv_id: int | None = None
+    run_id: int | None = None
+    for ev in stream_agent_chat(db, user, payload, prepared):
+        if ev["type"] == "done":
+            answer = ev["answer"]
+            conv_id = ev["conversation_id"]
+            run_id = ev["run_id"]
+        elif ev["type"] == "error":
+            raise HTTPException(
+                status.HTTP_502_BAD_GATEWAY, detail=f"Agent error: {ev['message']}"
+            )
+    if run_id is None:
+        raise HTTPException(
+            status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Agent did not complete"
+        )
+    return AskResult(
+        answer=answer,
+        conversation_id=conv_id,
+        run_id=run_id,
+        sources=prepared.ctx.collected_sources,
+    )
+
+
 def stream_agent_chat(
     db: Session,
     user: User,
@@ -113,7 +151,11 @@ def stream_agent_chat(
     db.commit()
     db.refresh(run_row)
 
-    graph = agent_graph.build_graph(prepared.llm, prepared.tools_by_agent)
+    graph = agent_graph.build_graph(
+        prepared.llm,
+        prepared.tools_by_agent,
+        memory_context=prepared.memory_context,
+    )
     answer_parts: list[str] = []
     final_answer = ""
     route = payload.route

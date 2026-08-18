@@ -8,6 +8,7 @@ class FakeToolCallingModel(BaseChatModel):
 
     responses: list
     tools: list | None = None
+    last_input: list | None = None
 
     def __init__(self, responses, **kwargs):
         super().__init__(responses=list(responses), **kwargs)
@@ -21,6 +22,7 @@ class FakeToolCallingModel(BaseChatModel):
         return self
 
     def _generate(self, messages, stop=None, run_manager=None, **kwargs):
+        self.last_input = list(messages)  # 记录本次输入,供注入断言
         if not self.responses:
             return ChatResult(
                 generations=[ChatGeneration(message=AIMessage(content="完成"))]

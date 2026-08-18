@@ -44,10 +44,19 @@ class AgentState(TypedDict):
 
 
 def build_graph(
-    llm: BaseChatModel, tools_by_agent: dict[str, list]
+    llm: BaseChatModel,
+    tools_by_agent: dict[str, list],
+    memory_context: str = "",
 ) -> "CompiledStateGraph":
-    """构造 Supervisor + 4 agent 编排图(带 InMemorySaver 会话记忆)。"""
+    """构造 Supervisor + 4 agent 编排图(带 InMemorySaver 会话记忆)。
+
+    memory_context: 用户长期记忆文本块;非空时追加到 Supervisor 与各 agent 的
+    SystemPrompt,让 agent 在作答时参考已知偏好/事实。
+    """
     from langgraph.graph.state import CompiledStateGraph
+
+    def _with_memory(base: str) -> str:
+        return f"{base}\n\n{memory_context}" if memory_context else base
 
     # create_react_agent 在 langgraph-prebuilt 1.1 打弃用告警(类别非 UserWarning),
     # 用 catch_warnings 局部抑制,构造期集中发出。
@@ -57,17 +66,19 @@ def build_graph(
             name: create_react_agent(
                 llm,
                 tools_by_agent.get(name, []),
-                prompt=SystemMessage(content=_AGENT_PROMPTS[name]),
+                prompt=SystemMessage(content=_with_memory(_AGENT_PROMPTS[name])),
             )
             for name in ROUTES
         }
+
+    supervisor_prompt = _with_memory(_SUPERVISOR_PROMPT)
 
     def supervisor(state: AgentState) -> dict:
         if state.get("route") in ROUTES:
             return {"route": state["route"]}  # 已指定路由(override/记忆)
         question = state["messages"][-1].content
         resp = llm.invoke(
-            [SystemMessage(content=_SUPERVISOR_PROMPT), HumanMessage(content=question)]
+            [SystemMessage(content=supervisor_prompt), HumanMessage(content=question)]
         )
         route = parse_route(getattr(resp, "content", "")) or heuristic_route(question)
         return {"route": route}
