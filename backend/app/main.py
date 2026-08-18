@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 
 from app.api.a2a import router as a2a_router
+from app.api.a2ui import router as a2ui_router
 from app.api.agent_chat import router as agent_chat_router
 from app.api.auth import router as auth_router
 from app.api.chat import router as chat_router
@@ -26,6 +27,7 @@ def create_app() -> FastAPI:
     app.include_router(conversations_router, prefix=settings.API_V1_PREFIX)
     app.include_router(agent_chat_router, prefix=settings.API_V1_PREFIX)
     app.include_router(skills_router, prefix=settings.API_V1_PREFIX)
+    app.include_router(a2ui_router, prefix=settings.API_V1_PREFIX)
     app.include_router(mcp_router)  # 协议入口,根路径 /mcp
     app.include_router(a2a_router)  # 协议入口,根路径 /a2a
     return app
