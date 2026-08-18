@@ -58,7 +58,7 @@
 
 ### Task 3: 身份重写 + 推送 GitHub
 
-- [ ] **Step 1: 用用户邮箱重写全部提交作者/提交者为 Elysiafans**
-- [ ] **Step 2: 配置 remote `git@github.com:Elysiafans/DocAgent.git` + SSH 测试**
-- [ ] **Step 3: `git push -u origin main` 成功;`git ls-remote` 验证远端有内容**
-- [ ] **Step 4: 清理(临时分支/过滤缓存);`git status` 干净;提交收尾(若有)**
+- [x] **Step 1: 用用户邮箱重写全部提交作者/提交者为 Elysiafans**
+- [x] **Step 2: 配置 remote `git@github.com:Elysiafans/DocAgent.git` + SSH 测试**
+- [x] **Step 3: `git push -u origin main` 成功;`git ls-remote` 验证远端有内容**
+- [x] **Step 4: 清理(临时分支/过滤缓存);`git status` 干净;提交收尾(若有)**
