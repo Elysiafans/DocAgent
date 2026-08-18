@@ -16,6 +16,11 @@ class Settings(BaseSettings):
     DEBUG: bool = False
     API_V1_PREFIX: str = "/api/v1"
 
+    # JWT
+    SECRET_KEY: str = "dev-secret-change-me-in-prod"
+    ALGORITHM: str = "HS256"
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 7  # 7 天
+
     # PostgreSQL
     POSTGRES_USER: str = "docagent"
     POSTGRES_PASSWORD: str = "docagent_dev_password"
