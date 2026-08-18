@@ -16,12 +16,14 @@ class ChatProvider(Protocol):
 class DeepSeekChatProvider:
     """DeepSeek 对话(deepseek-v4-flash),OpenAI 兼容接口。"""
 
-    def __init__(self, temperature: float = 0.2):
+    def __init__(self, temperature: float = 0.2, api_key: str | None = None):
         s = get_settings()
         self.model = s.DEEPSEEK_CHAT_MODEL
         self.temperature = temperature
         self._client = OpenAI(
-            api_key=s.DEEPSEEK_API_KEY, base_url=s.DEEPSEEK_BASE_URL
+            # api_key 可显式注入(测试用 dummy,避免依赖环境密钥)
+            api_key=api_key or s.DEEPSEEK_API_KEY,
+            base_url=s.DEEPSEEK_BASE_URL,
         )
 
     def complete(

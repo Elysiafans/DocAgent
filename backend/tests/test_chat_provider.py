@@ -4,7 +4,8 @@ from app.rag.chat_provider import DeepSeekChatProvider
 
 
 def test_deepseek_complete_uses_v4_flash(monkeypatch):
-    provider = DeepSeekChatProvider()
+    # dummy key:构造需要非空 api_key,但测试不调真实 API(下面替换 _client)
+    provider = DeepSeekChatProvider(api_key="test-key")
     calls = []
 
     class FakeResp:
