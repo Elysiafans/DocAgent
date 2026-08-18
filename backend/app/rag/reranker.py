@@ -8,7 +8,7 @@ from app.core.config import get_settings
 class Reranker(Protocol):
     """重排抽象:输入 query + 候选文档,返回按相关度降序的 (index, score) 列表(取 top_n)。"""
 
-    def rerank(
+    def __call__(
         self, query: str, documents: list[str], top_n: int
     ) -> list[tuple[int, float]]: ...
 
@@ -61,3 +61,9 @@ class SiliconFlowReranker:
             reverse=True,
         )
         return [(r["index"], float(r["relevance_score"])) for r in results[:top_n]]
+
+    def __call__(
+        self, query: str, documents: list[str], top_n: int
+    ) -> list[tuple[int, float]]:
+        """让实例可作为 Reranker callable 传给 retrieve()。"""
+        return self.rerank(query, documents, top_n)
