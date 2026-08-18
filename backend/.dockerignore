@@ -1,0 +1,17 @@
+# 密钥永不入镜像
+.env
+.env.*
+
+# Python 缓存/测试
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# 测试不打包进生产镜像
+tests/
+
+# 系统
+*.db
+*.sqlite3
