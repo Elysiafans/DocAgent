@@ -16,6 +16,7 @@ from app.rag.embeddings import SiliconFlowEmbeddingProvider
 from app.rag.reranker import Reranker, SiliconFlowReranker
 from app.rag.vector_store import QdrantVectorStore
 from app.schemas.agent import AgentChatRequest
+from app.services import memory_service
 
 
 # ---- Provider 注入缝(测试 monkeypatch 替换)----
@@ -103,6 +104,7 @@ def prepare_agent_chat(
         tools_by_agent=tools_by_agent,
         llm=_make_chat_llm(),
         thread_id=f"conv_{conv.id}",  # InMemorySaver 会话记忆:按会话分线程
+        memory_context=memory_service.build_memory_context(db, user),  # 长期记忆
     )
 
 
