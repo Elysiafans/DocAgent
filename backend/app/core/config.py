@@ -34,7 +34,7 @@ class Settings(BaseSettings):
     # LLM / 嵌入 / 重排提供商(D3/D5 使用,先留空)
     DEEPSEEK_API_KEY: str = ""
     DEEPSEEK_BASE_URL: str = "https://api.deepseek.com"
-    DEEPSEEK_CHAT_MODEL: str = "deepseek-chat"
+    DEEPSEEK_CHAT_MODEL: str = "deepseek-v4-flash"
     SILICONFLOW_API_KEY: str = ""
     SILICONFLOW_BASE_URL: str = "https://api.siliconflow.cn/v1"
     EMBEDDING_MODEL: str = "BAAI/bge-m3"

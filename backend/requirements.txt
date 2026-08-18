@@ -17,3 +17,12 @@ passlib==1.7.4
 # passlib 与 bcrypt>=4.1 不兼容,固定 4.0.1(FastAPI 官方推荐组合)
 bcrypt==4.0.1
 email-validator==2.2.0
+
+# ---- D3 新增(文档处理 + RAG 底座)----
+qdrant-client==1.19.0
+langchain-core==1.5.2
+langchain-text-splitters==1.1.2
+langchain-openai==1.4.1
+openai==2.48.0
+pypdf==6.16.1
+python-docx==1.2.0
