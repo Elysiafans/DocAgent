@@ -36,3 +36,9 @@ langgraph-prebuilt==1.1.0
 langgraph-sdk==0.4.2
 langsmith==0.10.11
 duckduckgo-search==8.1.1
+
+# ---- D8 修正:Docker 构建时发现 yy 环境有但 requirements 缺失 ----
+# JWT 编解码(FastAPI 官方推荐组合 python-jose + passlib)
+python-jose==3.5.0
+# 文档上传 UploadFile(File(...)) 依赖
+python-multipart==0.0.32
