@@ -43,6 +43,10 @@ class SiliconFlowEmbeddingProvider:
             results.extend(self._embed_batch(batch))
         return results
 
+    def __call__(self, texts: list[str]) -> list[list[float]]:
+        """让实例可直接作为 Embedder callable 传给 QdrantVectorStore。"""
+        return self.embed_texts(texts)
+
     def _embed_batch(self, batch: list[str], retries: int = 2) -> list[list[float]]:
         last_err: Exception | None = None
         for attempt in range(retries + 1):

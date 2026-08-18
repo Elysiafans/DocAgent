@@ -37,3 +37,25 @@ def test_provider_batches_and_parses(monkeypatch):
     assert len(result) == 2
     assert len(result[0]) == 4
     assert calls and len(calls) == 1  # 一次批量
+
+
+def test_provider_instance_is_callable(monkeypatch):
+    """回归:Provider 实例可直接作为 Embedder 传给 QdrantVectorStore。"""
+    provider = SiliconFlowEmbeddingProvider()
+
+    def fake_post(self, *args, **kwargs):
+        class R:
+            def raise_for_status(self):
+                return None
+
+            def json(self):
+                data = kwargs["json"] or args[1]
+                n = len(data["input"])
+                return {"data": [{"embedding": [0.5] * 4, "index": i} for i in range(n)]}
+
+        return R()
+
+    monkeypatch.setattr("app.rag.embeddings.httpx.Client.post", fake_post)
+    result = provider(["x", "y"])
+    assert len(result) == 2
+    assert result == provider.embed_texts(["x", "y"])
