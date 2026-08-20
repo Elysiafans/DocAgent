@@ -1,6 +1,8 @@
 <script setup>
 import { ref, onMounted, onBeforeUnmount } from 'vue'
 import { listTaskRuns, getTaskRun } from '../api.js'
+import StatusBadge from '../components/StatusBadge.vue'
+import EmptyState from '../components/EmptyState.vue'
 
 const runs = ref([])
 const selectedId = ref(null)
@@ -9,7 +11,6 @@ const err = ref('')
 let timer = null
 
 const TYPE_LABEL = { agent: '多智能体对话', ingestion: '文档入库' }
-const STATUS_CLS = { success: 'ok', failed: 'err', running: 'phase' }
 
 const EVENT_ICON = {
   route: '🧭',
@@ -98,7 +99,11 @@ onBeforeUnmount(() => {
         <button class="ghost" style="margin-left: auto" @click="load">刷新</button>
       </h3>
       <p v-if="err" class="err">{{ err }}</p>
-      <div v-if="runs.length === 0" class="empty">暂无任务。</div>
+      <EmptyState
+        v-if="runs.length === 0"
+        title="暂无任务"
+        hint="发起一次对话或上传文档后,这里会出现运行记录。"
+      />
       <div class="list" style="max-height: 62vh; overflow-y: auto">
         <div
           v-for="r in runs"
@@ -113,7 +118,7 @@ onBeforeUnmount(() => {
               <template v-if="r.finished_at"> → {{ fmtShort(r.finished_at) }}</template>
             </span>
           </div>
-          <span :class="['badge', STATUS_CLS[r.status]]">{{ r.status }}</span>
+          <StatusBadge :status="r.status" />
           <div v-if="r.error" class="sub err" style="flex-basis: 100%">{{ r.error }}</div>
         </div>
       </div>
@@ -129,12 +134,14 @@ onBeforeUnmount(() => {
           </span>
         </h3>
 
-        <div v-if="!detail" class="empty">加载中…</div>
+        <EmptyState v-if="!detail" title="加载中…" />
 
         <div v-else class="timeline">
-          <div v-if="!detail.trace || !detail.trace.events || detail.trace.events.length === 0" class="empty">
-            无事件(该运行无 trace)。
-          </div>
+          <EmptyState
+            v-if="!detail.trace || !detail.trace.events || detail.trace.events.length === 0"
+            title="无事件"
+            hint="该运行没有 trace 事件,可能为空跑。"
+          />
           <div
             v-for="(ev, i) in (detail.trace?.events || [])"
             :key="i"
@@ -151,7 +158,7 @@ onBeforeUnmount(() => {
           </div>
         </div>
       </template>
-      <div v-else class="empty">← 选择一条任务查看 trace 事件时间线</div>
+      <EmptyState v-else title="选择一条任务" hint="← 从左侧选择一条任务查看 trace 事件时间线。" />
     </section>
   </div>
 </template>

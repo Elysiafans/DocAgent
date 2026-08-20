@@ -117,8 +117,17 @@ async function submit() {
 .auth-brand {
   font-size: 26px;
   font-weight: 700;
-  color: var(--accent);
+  font-family: var(--font-display);
+  color: var(--ink);
   text-align: center;
+}
+.auth-brand::before {
+  content: 'DA';
+  display: inline-block;
+  width: 24px; height: 24px; margin-right: 8px;
+  border: var(--hairline-w) solid var(--cobalt);
+  color: var(--cobalt); border-radius: var(--radius-sm);
+  font-size: 11px; font-weight: 600; line-height: 22px; vertical-align: 3px;
 }
 .auth-sub {
   text-align: center;
