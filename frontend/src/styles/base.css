@@ -1,0 +1,156 @@
+/* DocAgent 基础样式 —— 全部引用 tokens.css。 */
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+#app { min-height: 100vh; display: flex; flex-direction: column; }
+
+a { color: var(--cobalt); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+/* 交互元素焦点(键盘可达) */
+:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+  border-radius: var(--radius-sm);
+}
+
+button {
+  background: var(--bg-input);
+  color: var(--ink);
+  border: var(--hairline-w) solid var(--border);
+  border-radius: var(--radius);
+  padding: 6px 14px;
+  font-size: 13px;
+  font-family: inherit;
+  cursor: pointer;
+  transition: border-color var(--dur) var(--ease), background var(--dur) var(--ease);
+}
+button:hover:not(:disabled) { border-color: var(--border-hover); background: #f0ecdf; }
+button:disabled { opacity: 0.5; cursor: not-allowed; }
+
+button.primary {
+  background: var(--cobalt-strong);
+  border-color: var(--cobalt-strong);
+  color: #fff;
+  font-weight: 600;
+}
+button.primary:hover:not(:disabled) { background: var(--cobalt); border-color: var(--cobalt); }
+
+button.ghost { background: transparent; border-color: transparent; color: var(--dim); }
+button.ghost:hover:not(:disabled) { border-color: var(--border-hover); color: var(--ink); background: transparent; }
+
+button.danger:hover:not(:disabled) { border-color: var(--clay); color: var(--clay); }
+
+button.active { background: var(--cobalt-strong); border-color: var(--cobalt-strong); color: #fff; }
+
+input[type="text"], input[type="password"], input[type="email"], textarea, select {
+  background: var(--bg-input);
+  color: var(--ink);
+  border: var(--hairline-w) solid var(--border);
+  border-radius: var(--radius);
+  padding: 8px 10px;
+  font-size: 13px;
+  font-family: inherit;
+  width: 100%;
+  outline: none;
+}
+input:focus, textarea:focus, select:focus { border-color: var(--cobalt); box-shadow: var(--focus-ring); }
+
+textarea { resize: vertical; min-height: 60px; }
+
+label { font-size: 12px; color: var(--dim); display: block; margin-bottom: 4px; }
+
+/* ---- 布局 ---- */
+.page { flex: 1; width: 100%; max-width: 960px; margin: 0 auto; padding: 24px 20px 64px; }
+
+/* ---- 组件类 ---- */
+.card {
+  background: var(--surface);
+  border: var(--hairline-w) solid var(--hairline);
+  border-radius: var(--radius);
+  padding: 16px;
+  margin-bottom: 16px;
+}
+.card h3 { margin: 0 0 12px; font-family: var(--font-display); font-size: 16px; }
+
+.muted { color: var(--dim); }
+.mono { font-family: var(--mono); font-size: 12px; }
+.err { color: var(--clay); }
+.ok { color: var(--sage); }
+.warn { color: var(--mustard); }
+
+.badge {
+  display: inline-flex; align-items: center; gap: 4px;
+  border: var(--hairline-w) solid var(--border);
+  border-radius: 999px;
+  padding: 1px 10px;
+  font-size: 12px;
+  color: var(--dim);
+  background: var(--surface);
+}
+.badge.ok { color: var(--sage); border-color: var(--sage); }
+.badge.err { color: var(--clay); border-color: var(--clay); }
+.badge.phase { color: var(--mustard); border-color: var(--mustard); }
+.badge.route { color: var(--cobalt); border-color: var(--cobalt); }
+
+.field { margin-bottom: 12px; }
+.row { display: flex; gap: 8px; align-items: center; }
+.row .grow { flex: 1; }
+
+.list { display: flex; flex-direction: column; gap: 8px; }
+.item {
+  display: flex; align-items: center; gap: 10px;
+  background: var(--surface);
+  border: var(--hairline-w) solid var(--border);
+  border-radius: var(--radius);
+  padding: 10px 12px;
+}
+.item.selected { border-color: var(--cobalt); }
+.item .name { flex: 1; font-weight: 500; }
+.item .sub { color: var(--dim); font-size: 12px; }
+
+/* 空态:邀请行动 */
+.empty { text-align: center; color: var(--dim); padding: 32px 0; }
+
+/* 加载 */
+.spin {
+  display: inline-block; width: 14px; height: 14px;
+  border: 2px solid var(--border);
+  border-top-color: var(--cobalt);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* 滚动条 */
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+
+/* 顶栏(过渡样式:App.vue 登录态目前无 scoped,靠这里;Task 2 迁入 TopBar 组件后移除) */
+.topbar {
+  display: flex; align-items: center; gap: 16px;
+  padding: 10px 20px;
+  background: var(--surface);
+  border-bottom: var(--hairline-w) solid var(--hairline);
+  position: sticky; top: 0; z-index: 10;
+}
+.topbar .brand { font-family: var(--font-display); font-size: 16px; font-weight: 700; color: var(--ink); }
+.topbar .brand span { color: var(--dim); font-size: 13px; font-weight: 400; }
+.topbar .nav { display: flex; gap: 4px; flex: 1; }
+.topbar .spacer { flex: 1; }
+
+/* 动效偏好:减少动态 */
+@media (prefers-reduced-motion: reduce) {
+  .spin, .caret { animation: none; }
+  * { transition-duration: 0.01ms !important; }
+}

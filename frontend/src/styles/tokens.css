@@ -1,0 +1,45 @@
+/* DocAgent 设计 token —— 方向 B「实验室档案」
+   配色/字体/几何/动效的唯一来源。旧语义变量(--bg 等)作为别名映射到新配色,
+   让存量视图无需逐处改动即完成换肤;新代码优先直接使用 --paper/--surface/--ink 等。 */
+:root {
+  /* 命名色 */
+  --paper: #f6f3ec;
+  --surface: #fdfbf6;
+  --ink: #1b1a16;
+  --dim: #6e6a5e;
+  --hairline: #dad4c5;
+  --cobalt: #1d5fc9;
+  --cobalt-strong: #164a9e;
+  --cobalt-tint: #e8effb;
+  --clay: #c9381c;
+  --sage: #5b8a4a;
+  --mustard: #b98a1e;
+
+  /* 语义别名(兼容旧变量引用) */
+  --bg: var(--paper);
+  --bg-panel: var(--surface);
+  --bg-input: var(--surface);
+  --border: var(--hairline);
+  --border-hover: #b9b2a0;
+  --text: var(--ink);
+  --text-dim: var(--dim);
+  --accent: var(--cobalt);
+  --accent-strong: var(--cobalt-strong);
+  --green: var(--sage);
+  --yellow: var(--mustard);
+  --red: var(--clay);
+  --purple: var(--cobalt);
+
+  /* 字体三件套 */
+  --font-display: Georgia, 'Noto Serif SC', 'Songti SC', serif;
+  --font-body: 'Inter', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  --mono: 'JetBrains Mono', ui-monospace, 'SFMono-Regular', Consolas, monospace;
+
+  /* 几何 / 动效 */
+  --radius: 8px;
+  --radius-sm: 4px;
+  --hairline-w: 1px;
+  --dur: 150ms;
+  --ease: ease;
+  --focus-ring: 0 0 0 2px var(--paper), 0 0 0 4px var(--cobalt);
+}
