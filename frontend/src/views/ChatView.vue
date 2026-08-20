@@ -1,6 +1,9 @@
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { listKbs, streamChat, renderCard } from '../api.js'
+import MessageBubble from '../components/MessageBubble.vue'
+import SourcePanel from '../components/SourcePanel.vue'
+import EmptyState from '../components/EmptyState.vue'
 
 const props = defineProps({
   kbId: { type: [Number, String], default: null },
@@ -110,6 +113,15 @@ function finalize(content, sources, convId, runId) {
   resetCur()
 }
 
+// 最近一条助手消息的溯源(右侧来源栏)
+const activeSources = computed(() => {
+  for (let i = msgs.value.length - 1; i >= 0; i--) {
+    const m = msgs.value[i]
+    if (m.role === 'assistant' && m.sources && m.sources.length) return m.sources
+  }
+  return []
+})
+
 async function toggleCard() {
   if (!selectedKbId.value) return
   if (cardOpen.value) {
@@ -144,14 +156,10 @@ async function toggleCard() {
     <div class="card controls">
       <div class="row">
         <select v-model="selectedKbId" class="grow" style="max-width: 240px">
-          <option v-for="kb in kbs" :key="kb.id" :value="kb.id">
-            {{ kb.name }}
-          </option>
+          <option v-for="kb in kbs" :key="kb.id" :value="kb.id">{{ kb.name }}</option>
         </select>
         <select v-model="route" style="max-width: 160px">
-          <option v-for="r in ROUTES" :key="r.value" :value="r.value">
-            {{ r.label }}
-          </option>
+          <option v-for="r in ROUTES" :key="r.value" :value="r.value">{{ r.label }}</option>
         </select>
         <button :class="{ active: cardOpen }" @click="toggleCard">
           {{ cardLoading ? '生成中…' : cardOpen ? '关闭卡片' : '卡片视图' }}
@@ -160,97 +168,79 @@ async function toggleCard() {
       </div>
     </div>
 
-    <!-- 对话区 -->
-    <div class="chat-log">
-      <div v-if="msgs.length === 0 && !sending" class="empty">
-        向你的知识库提问吧。示例:「总结最近上传的文档」「对比两个方案的优劣」。
-      </div>
+    <div class="chat-main">
+      <!-- 左:对话 -->
+      <div class="conv-col">
+        <div class="chat-log">
+          <EmptyState
+            v-if="msgs.length === 0 && !sending"
+            title="向知识库提问"
+            hint="示例:「总结最近上传的文档」「对比两个方案的优劣」。"
+          />
+          <MessageBubble v-for="(m, i) in msgs" :key="i" :msg="m" />
 
-      <template v-for="(m, i) in msgs" :key="i">
-        <div class="msg user">
-          <div class="bubble">{{ m.content }}</div>
-        </div>
-        <div class="msg assistant">
-          <div class="bubble">
-            <div class="stream-meta" v-if="m.convId">
-              <span class="badge ok">run #{{ m.runId }}</span>
-              <span class="badge">会话 #{{ m.convId }}</span>
-            </div>
-            <div class="content">{{ m.content }}</div>
-
-            <!-- 溯源:编号与回答中的 [i] 对应 -->
-            <div v-if="m.sources && m.sources.length" class="sources">
-              <div class="sources-title">溯源 {{ m.sources.length }} 条</div>
-              <div v-for="(s, j) in m.sources" :key="j" class="source">
-                <span class="badge">[{{ j + 1 }}]</span>
-                <span class="src-name">{{ s.doc_name || '文档' }}</span>
-                <span class="muted mono">score {{ s.score }}</span>
-                <div class="src-text">{{ s.content }}</div>
+          <!-- 流式中 -->
+          <div v-if="sending" class="msg assistant">
+            <div class="bubble">
+              <div class="meta mono">
+                <span v-if="cur.route">route: {{ cur.route }}</span>
+                <span v-if="cur.node">{{ NODE_LABEL[cur.node] || cur.node }}</span>
+                <span class="spin" style="margin-left: 4px" />
               </div>
-            </div>
-          </div>
-        </div>
-      </template>
-
-      <!-- 流式中 -->
-      <div v-if="sending" class="msg assistant">
-        <div class="bubble">
-          <div class="stream-meta">
-            <span v-if="cur.route" class="badge route">route: {{ cur.route }}</span>
-            <span v-if="cur.node" class="badge phase">
-              {{ NODE_LABEL[cur.node] || cur.node }}
-            </span>
-            <span class="spin" style="margin-left: 4px" />
-          </div>
-
-          <div v-if="cur.tools.length" class="tools">
-            <div v-for="(t, j) in cur.tools" :key="j" class="tool-chip mono">
-              🔧 {{ t.name }}<span v-if="t.args && t.args.query">: "{{ t.args.query }}"</span>
+              <div v-if="cur.tools.length" class="tools">
+                <div v-for="(t, j) in cur.tools" :key="j" class="tool-chip mono">
+                  🔧 {{ t.name }}<span v-if="t.args && t.args.query">: "{{ t.args.query }}"</span>
+                </div>
+              </div>
+              <div class="content">{{ cur.content }}<span class="caret">▍</span></div>
             </div>
           </div>
 
-          <div class="content">{{ cur.content }}<span class="caret">▍</span></div>
+          <p v-if="err" class="err" style="padding: 4px 8px">{{ err }}</p>
         </div>
+
+        <!-- 输入 -->
+        <form class="card input-bar" @submit.prevent="send">
+          <textarea
+            v-model="question"
+            rows="1"
+            placeholder="输入问题,Enter 发送,Shift+Enter 换行"
+            @keydown.enter.exact.prevent="send"
+          />
+          <button
+            class="primary"
+            type="submit"
+            :disabled="sending || !selectedKbId || !question.trim()"
+          >
+            {{ sending ? '生成中…' : '发送' }}
+          </button>
+        </form>
       </div>
 
-      <p v-if="err" class="err" style="padding: 4px 8px">{{ err }}</p>
+      <!-- 右:引用来源(≤900px 隐藏) -->
+      <aside class="source-col">
+        <h5>引用来源</h5>
+        <SourcePanel v-if="activeSources.length" :sources="activeSources" />
+        <EmptyState v-else title="暂无引用" hint="发起问答后,这里会展示回答的溯源脚注。" />
+      </aside>
     </div>
 
     <!-- A2UI 卡片 JSON 预览 -->
     <div v-if="cardOpen" class="card">
-      <h3>A2UI 卡片(D6 协议渲染)</h3>
+      <h3>A2UI 卡片(协议渲染)</h3>
       <p v-if="cardLoading" class="muted">正在生成卡片(同步执行 agent 图)…</p>
       <p v-if="cardErr" class="err">{{ cardErr }}</p>
       <pre v-if="cardData" class="card-json">{{ JSON.stringify(cardData, null, 2) }}</pre>
     </div>
-
-    <!-- 输入 -->
-    <form class="card input-bar" @submit.prevent="send">
-      <textarea
-        v-model="question"
-        rows="1"
-        placeholder="输入问题,Enter 发送,Shift+Enter 换行"
-        @keydown.enter.exact.prevent="send"
-      />
-      <button
-        class="primary"
-        type="submit"
-        :disabled="sending || !selectedKbId || !question.trim()"
-      >
-        {{ sending ? '生成中…' : '发送' }}
-      </button>
-    </form>
   </div>
 </template>
 
 <style scoped>
-.chat-layout {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  height: calc(100vh - 120px);
-}
+.chat-layout { display: flex; flex-direction: column; gap: 12px; height: calc(100vh - 120px); }
 .controls .row { flex-wrap: wrap; }
+
+.chat-main { flex: 1; min-height: 0; display: flex; gap: 16px; }
+.conv-col { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 12px; }
 
 .chat-log {
   flex: 1;
@@ -261,66 +251,33 @@ async function toggleCard() {
   padding: 4px 2px;
 }
 .msg { display: flex; }
-.msg.user { justify-content: flex-end; }
 .msg.assistant { justify-content: flex-start; }
-
 .bubble {
   max-width: 86%;
-  background: var(--bg-panel);
-  border: 1px solid var(--border);
+  background: var(--surface);
+  border: var(--hairline-w) solid var(--hairline);
   border-radius: var(--radius);
   padding: 12px 14px;
 }
-.msg.user .bubble {
-  background: var(--accent-strong);
-  border-color: var(--accent-strong);
-}
-.msg.user .bubble .content { color: #fff; }
-
-.stream-meta {
-  display: flex;
-  gap: 6px;
-  align-items: center;
-  margin-bottom: 8px;
-  flex-wrap: wrap;
-}
+.meta { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; margin-bottom: 6px; font-size: 12px; color: var(--dim); }
 .content { white-space: pre-wrap; word-break: break-word; }
-.caret { color: var(--accent); animation: blink 1s step-end infinite; }
+.caret { color: var(--cobalt); animation: blink 1s step-end infinite; }
 @keyframes blink { 50% { opacity: 0; } }
 
 .tools { display: flex; flex-direction: column; gap: 4px; margin-bottom: 8px; }
 .tool-chip {
-  background: var(--bg);
-  border: 1px solid var(--border);
-  border-radius: 4px;
+  background: var(--paper);
+  border: var(--hairline-w) solid var(--border);
+  border-radius: var(--radius-sm);
   padding: 2px 8px;
-  color: var(--purple);
+  color: var(--cobalt);
   width: fit-content;
 }
 
-.sources { margin-top: 12px; border-top: 1px dashed var(--border); padding-top: 8px; }
-.sources-title { font-size: 12px; color: var(--text-dim); margin-bottom: 6px; }
-.source {
-  border: 1px solid var(--border);
-  background: var(--bg);
-  border-radius: 6px;
-  padding: 8px 10px;
-  margin-bottom: 6px;
-}
-.src-name { font-weight: 600; margin: 0 8px; }
-.src-text {
-  margin-top: 4px;
-  font-size: 12px;
-  color: var(--text-dim);
-  max-height: 60px;
-  overflow-y: auto;
-  white-space: pre-wrap;
-}
-
 .card-json {
-  background: var(--bg);
-  border: 1px solid var(--border);
-  border-radius: 6px;
+  background: var(--paper);
+  border: var(--hairline-w) solid var(--border);
+  border-radius: var(--radius-sm);
   padding: 12px;
   max-height: 320px;
   overflow: auto;
@@ -331,4 +288,22 @@ async function toggleCard() {
 .input-bar { display: flex; gap: 8px; align-items: flex-end; margin-bottom: 0; }
 .input-bar textarea { flex: 1; }
 .input-bar button { white-space: nowrap; }
+
+/* 右侧来源栏 */
+.source-col {
+  width: 240px;
+  flex-shrink: 0;
+  border-left: var(--hairline-w) solid var(--hairline);
+  padding-left: 16px;
+  overflow-y: auto;
+}
+.source-col h5 {
+  margin: 0 0 8px; font-family: var(--mono); font-size: 11px;
+  letter-spacing: 0.5px; color: var(--dim); font-weight: 600;
+}
+
+/* 窄屏:隐藏右侧来源栏(消息内 inline 来源保留) */
+@media (max-width: 900px) {
+  .source-col { display: none; }
+}
 </style>
