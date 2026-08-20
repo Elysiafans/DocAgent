@@ -219,7 +219,6 @@ async function toggleCard() {
 
       <!-- 右:引用来源(≤900px 隐藏) -->
       <aside class="source-col">
-        <h5>引用来源</h5>
         <SourcePanel v-if="activeSources.length" :sources="activeSources" />
         <EmptyState v-else title="暂无引用" hint="发起问答后,这里会展示回答的溯源脚注。" />
       </aside>
