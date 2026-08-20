@@ -21,3 +21,7 @@ extend-immutable-calls = [
     "fastapi.Header",
     "fastapi.File",
 ]
+
+# main.py 顶部有 sys.path 引导块(直接运行 bootstrap),import 位于语句之后属预期。
+[lint.per-file-ignores]
+"backend/app/main.py" = ["E402"]

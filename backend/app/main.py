@@ -1,3 +1,11 @@
+import sys
+from pathlib import Path
+
+# 直接 `python backend/app/main.py` 运行时,脚本所在目录(backend/app)在 sys.path 上,
+# 但包级导入 `from app.api...` 需要 backend/ 在 sys.path。此处仅直接运行时补上。
+if __package__ in (None, ""):
+    sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+
 from fastapi import FastAPI
 
 from app.api.a2a import router as a2a_router
@@ -36,3 +44,17 @@ def create_app() -> FastAPI:
 
 
 app = create_app()
+
+
+if __name__ == "__main__":
+    # 直接运行入口:python backend/app/main.py
+    # app_dir 让 reload 子进程在任意 cwd 下都能定位 backend/。
+    import uvicorn
+
+    uvicorn.run(
+        "app.main:app",
+        host="0.0.0.0",
+        port=8000,
+        reload=True,
+        app_dir=str(Path(__file__).resolve().parent.parent),
+    )

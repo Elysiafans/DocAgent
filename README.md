@@ -86,6 +86,8 @@ pip install -r backend/requirements.txt
 #   docker run -d -p 6333:6333 qdrant/qdrant:v1.13.0
 cp .env.example .env
 cd backend && alembic upgrade head && uvicorn app.main:app --reload --port 8000
+# 也可以直接运行(等效入口,已内置 sys.path 引导):
+python backend/app/main.py
 ```
 
 **前端**(Node 20):
