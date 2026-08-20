@@ -1,5 +1,6 @@
 <script setup>
 import TopBar from '../components/TopBar.vue'
+import ArchiveCard from '../components/ArchiveCard.vue'
 // 首页导航:未登录首屏。入口按钮已登录直接进入,未登录先去登录(由 App.vue 处理)。
 defineProps({ authed: { type: Boolean, default: false } })
 defineEmits(['enter', 'login'])
@@ -52,11 +53,14 @@ const stack = ['FastAPI', 'LangGraph', 'Qdrant', 'PostgreSQL', 'Vue 3', 'SSE 流
       </section>
 
       <section class="grid">
-        <div v-for="e in entries" :key="e.key" class="card">
-          <h3>{{ e.icon }} {{ e.title }}</h3>
-          <p class="muted">{{ e.desc }}</p>
-          <button class="ghost" @click="$emit('enter', e.key)">进入 →</button>
-        </div>
+        <ArchiveCard
+          v-for="(e, i) in entries"
+          :key="e.key"
+          :no="'KB-0' + (i + 1)"
+          :name="e.title"
+          :meta="e.desc"
+          @select="$emit('enter', e.key)"
+        />
       </section>
 
       <section class="card tech">
@@ -117,8 +121,6 @@ const stack = ['FastAPI', 'LangGraph', 'Qdrant', 'PostgreSQL', 'Vue 3', 'SSE 流
   gap: 16px;
   margin-bottom: 16px;
 }
-.grid .card h3 { margin-bottom: 8px; }
-.grid .card p { min-height: 66px; margin-bottom: 12px; }
 .tech h3 { margin-bottom: 10px; }
 .chips {
   display: flex;
@@ -127,4 +129,9 @@ const stack = ['FastAPI', 'LangGraph', 'Qdrant', 'PostgreSQL', 'Vue 3', 'SSE 流
   margin-bottom: 14px;
 }
 .small { margin: 0; }
+@media (max-width: 900px) { .grid { grid-template-columns: 1fr; } }
+@media (max-width: 480px) {
+  .hero h1 { font-size: 22px; }
+  .hero-actions button { padding: 8px 14px; font-size: 13px; }
+}
 </style>

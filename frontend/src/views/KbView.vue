@@ -8,6 +8,9 @@ import {
   listDocs,
   uploadDoc,
 } from '../api.js'
+import ArchiveCard from '../components/ArchiveCard.vue'
+import StatusBadge from '../components/StatusBadge.vue'
+import EmptyState from '../components/EmptyState.vue'
 
 const emit = defineEmits(['select-kb'])
 
@@ -16,25 +19,11 @@ const selectedId = ref(null)
 const name = ref('')
 const creating = ref(false)
 const err = ref('')
-const msg = ref('')
 
 const docs = ref([])
 const uploading = ref(false)
 const fileInput = ref(null)
 let pollTimer = null
-
-const STATUS_LABEL = {
-  uploading: '上传中',
-  parsing: '解析中',
-  chunking: '分块中',
-  embedding: '向量化',
-  ready: '就绪',
-  failed: '失败',
-}
-const STATUS_CLS = {
-  ready: 'ok',
-  failed: 'err',
-}
 
 async function load() {
   try {
@@ -91,7 +80,7 @@ async function upload(file) {
     await loadDocs()
     startPoll() // 轮询直到所有文档终态
   } catch (e) {
-    err.value = e.message
+    err.value = '上传失败:解析失败。支持 txt / md / pdf / docx,重试或换格式。'
   } finally {
     uploading.value = false
   }
@@ -166,23 +155,22 @@ onBeforeUnmount(stopPoll)
       </form>
 
       <p v-if="err" class="err">{{ err }}</p>
-      <p v-if="msg" class="ok">{{ msg }}</p>
 
-      <div v-if="kbs.length === 0" class="empty">
-        暂无知识库,在上方新建一个。
+      <div v-if="kbs.length === 0">
+        <EmptyState title="还没有归档文献" hint="上传第一份 PDF / Markdown,开始建立你的档案库。" />
       </div>
-
-      <div class="list kb-list">
-        <div
-          v-for="kb in kbs"
+      <div v-else class="list kb-list">
+        <ArchiveCard
+          v-for="(kb, i) in kbs"
           :key="kb.id"
-          :class="['item', { selected: kb.id === selectedId }]"
-          @click="selectKb(kb.id)"
-        >
-          <div class="name">{{ kb.name }}</div>
-          <div class="sub">{{ kb.chunk_strategy }} · {{ kb.chunk_size }}字</div>
-          <button class="ghost danger" title="删除知识库" @click.stop="removeKb(kb.id)">×</button>
-        </div>
+          :no="`KB-${String(i + 1).padStart(2, '0')}`"
+          :name="kb.name"
+          :meta="`${kb.chunk_strategy} · ${kb.chunk_size} 字`"
+          :selected="kb.id === selectedId"
+          removable
+          @select="selectKb(kb.id)"
+          @remove="removeKb(kb.id)"
+        />
       </div>
     </section>
 
@@ -214,7 +202,9 @@ onBeforeUnmount(stopPoll)
           <span class="muted">支持 txt / md / pdf / docx</span>
         </div>
 
-        <div v-if="docs.length === 0" class="empty">该库还没有文档。</div>
+        <div v-if="docs.length === 0">
+          <EmptyState title="该库还没有文档" hint="点击上方「上传文档」开始。" />
+        </div>
 
         <div class="list">
           <div v-for="d in docs" :key="d.id" class="item">
@@ -222,15 +212,14 @@ onBeforeUnmount(stopPoll)
               {{ d.name }}
               <span class="sub">· {{ d.size }}B · {{ d.chunk_count }} 块</span>
             </div>
-            <span :class="['badge', STATUS_CLS[d.status]]">
-              <span v-if="['uploading','parsing','chunking','embedding'].includes(d.status)" class="spin" />
-              {{ STATUS_LABEL[d.status] || d.status }}{{ d.progress ? ` ${d.progress}%` : '' }}
-            </span>
+            <StatusBadge :status="d.status" :progress="d.progress" />
             <button class="ghost danger" @click="removeDoc(d.id)">删除</button>
           </div>
         </div>
       </template>
-      <div v-else class="empty">← 左侧选择一个知识库</div>
+      <div v-else>
+        <EmptyState title="选择一个知识库" hint="← 从左侧选择一个库查看其文档。" />
+      </div>
     </section>
   </div>
 </template>
@@ -251,11 +240,5 @@ onBeforeUnmount(stopPoll)
   margin-top: 12px;
   max-height: 60vh;
   overflow-y: auto;
-}
-.kb-list .item {
-  cursor: pointer;
-}
-.kb-list .item:hover {
-  border-color: var(--border-hover);
 }
 </style>
