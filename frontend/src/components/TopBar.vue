@@ -63,10 +63,12 @@ const NAVS = [
 }
 .nv-btn:hover { border: none; color: var(--ink); background: var(--cobalt-tint); }
 .nv-btn.on { color: var(--cobalt); font-weight: 600; }
+.nv-btn.on:hover { color: var(--cobalt); }
 .sp { flex: 1; }
 .who { font-size: 13px; }
 .btn-solid {
   background: var(--cobalt-strong); border-color: var(--cobalt-strong);
   color: #fff; font-weight: 600;
 }
+.btn-solid:hover { background: var(--cobalt); border-color: var(--cobalt); }
 </style>
