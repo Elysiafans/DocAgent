@@ -70,6 +70,7 @@ cp .env.example .env     # 按需填入 DEEPSEEK_API_KEY / SILICONFLOW_API_KEY
 docker compose up -d --build
 # 前端  http://localhost:5173
 # 后端  http://localhost:8000/api/v1/health
+# 后端根路径 http://localhost:8000/ 提供导航页(交互式文档 / 协议入口 / 前端地址)
 ```
 
 Compose 会拉起 `frontend(nginx) + backend(uvicorn) + postgres + qdrant` 四个容器,backend 启动时自动执行 `alembic upgrade head` 建表。上传文档后即可在「对话」页使用多智能体问答。

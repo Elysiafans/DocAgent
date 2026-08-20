@@ -16,6 +16,7 @@ from app.api.chat import router as chat_router
 from app.api.conversations import router as conversations_router
 from app.api.documents import router as documents_router
 from app.api.health import router as health_router
+from app.api.home import router as home_router
 from app.api.knowledge_bases import router as knowledge_bases_router
 from app.api.mcp import router as mcp_router
 from app.api.memories import router as memories_router
@@ -28,6 +29,7 @@ def create_app() -> FastAPI:
     settings = get_settings()
     setup_logging()
     app = FastAPI(title=settings.APP_NAME, debug=settings.DEBUG)
+    app.include_router(home_router)  # 根导航页 /
     app.include_router(health_router, prefix=settings.API_V1_PREFIX)
     app.include_router(auth_router, prefix=settings.API_V1_PREFIX)
     app.include_router(knowledge_bases_router, prefix=settings.API_V1_PREFIX)
