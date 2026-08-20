@@ -58,7 +58,7 @@ flowchart LR
 | **大模型应用 / 智能体编排** | LangGraph Supervisor + 4 智能体;工具调用(5 tools);会话记忆 + 用户长期记忆;`deepseek-v4-flash` 对话模型;失败回滚到 task_runs 错误记录 |
 | **Agent 互操作协议** | 自研 MCP 服务端(JSON-RPC 2.0 + SSE)、A2A、A2UI 结构化卡片、Skills 技能声明,前端可直接对接 Claude Desktop 等 MCP 客户端 |
 | **后端工程化** | FastAPI 分层架构、pydantic 校验、JWT 鉴权、SQLAlchemy + Alembic 迁移、结构化 JSON 日志、可观测 task_runs、依赖注入缝便于测试替身 |
-| **前端对接 / SSE 流式** | Vue 3 + Vite 单页应用,`fetch` + `ReadableStream` 解析 SSE,实时渲染 agent 路由/节点/工具/引用 |
+| **前端对接 / SSE 流式** | Vue 3 + Vite 单页应用,`fetch` + `ReadableStream` 解析 SSE,实时渲染 agent 路由/节点/工具/引用,视觉为定制「实验室档案」纸本编辑风(设计 token + 组件化) |
 | **测试与 CI/CD** | 单测 + 集成 + 全链路 E2E 三层(95 个测试,全 fake 模型,不依赖真实 API 密钥);ruff 静态检查;GitHub Actions 多 job(后端测试 / 前端构建 / 镜像构建);Docker Compose 全链路交付 |
 
 ## 快速开始
