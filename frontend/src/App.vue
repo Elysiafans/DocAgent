@@ -5,6 +5,7 @@ import AuthView from './views/AuthView.vue'
 import KbView from './views/KbView.vue'
 import ChatView from './views/ChatView.vue'
 import TasksView from './views/TasksView.vue'
+import TopBar from './components/TopBar.vue'
 
 // 全局共享状态(响应式)
 const token = ref(localStorage.getItem('docagent_token') || '')
@@ -49,6 +50,11 @@ function goHome() {
   currentView.value = 'home'
 }
 
+function onNav(key) {
+  if (key === 'home') goHome()
+  else go(key)
+}
+
 function onSelectKb(id) {
   selectedKbId.value = id
   currentView.value = 'chat'
@@ -78,27 +84,13 @@ function logout() {
 
   <!-- 已登录主界面 -->
   <template v-else>
-    <header class="topbar">
-      <div class="brand">DocAgent<span> · 多智能体知识库问答</span></div>
-      <nav class="nav">
-        <button
-          v-for="v in [
-            { key: 'home', label: '首页' },
-            { key: 'kb', label: '知识库' },
-            { key: 'chat', label: '对话' },
-            { key: 'tasks', label: '任务' },
-          ]"
-          :key="v.key"
-          :class="['ghost', { active: currentView === v.key }]"
-          @click="v.key === 'home' ? goHome() : go(v.key)"
-        >
-          {{ v.label }}
-        </button>
-      </nav>
-      <div class="spacer" />
-      <span class="muted">{{ user?.email }}</span>
-      <button class="ghost danger" @click="logout">退出</button>
-    </header>
+    <TopBar
+      :authed="true"
+      :active="currentView"
+      :email="user?.email"
+      @nav="onNav"
+      @logout="logout"
+    />
 
     <main class="page">
       <KbView v-if="currentView === 'kb'" @select-kb="onSelectKb" />

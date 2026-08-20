@@ -1,4 +1,5 @@
 <script setup>
+import TopBar from '../components/TopBar.vue'
 // 首页导航:未登录首屏。入口按钮已登录直接进入,未登录先去登录(由 App.vue 处理)。
 defineProps({ authed: { type: Boolean, default: false } })
 defineEmits(['enter', 'login'])
@@ -29,12 +30,7 @@ const stack = ['FastAPI', 'LangGraph', 'Qdrant', 'PostgreSQL', 'Vue 3', 'SSE 流
 
 <template>
   <div class="home">
-    <header class="home-top">
-      <div class="brand">DocAgent<span> · 多智能体知识库问答</span></div>
-      <div class="spacer" />
-      <button v-if="authed" class="ghost" @click="$emit('enter', 'kb')">进入控制台 →</button>
-      <button v-else class="primary" @click="$emit('login')">登录 / 注册</button>
-    </header>
+    <TopBar :authed="authed" @nav="(k) => $emit('enter', k)" @login="$emit('login')" />
 
     <main class="page home-body">
       <section class="hero">
@@ -85,14 +81,6 @@ const stack = ['FastAPI', 'LangGraph', 'Qdrant', 'PostgreSQL', 'Vue 3', 'SSE 流
   display: flex;
   flex-direction: column;
   min-height: 100vh;
-}
-.home-top {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  padding: 10px 20px;
-  background: var(--bg-panel);
-  border-bottom: 1px solid var(--border);
 }
 .home-body {
   padding-top: 44px;

@@ -136,19 +136,6 @@ label { font-size: 12px; color: var(--dim); display: block; margin-bottom: 4px; 
 ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
 ::-webkit-scrollbar-track { background: transparent; }
 
-/* 顶栏(过渡样式:App.vue 登录态目前无 scoped,靠这里;Task 2 迁入 TopBar 组件后移除) */
-.topbar {
-  display: flex; align-items: center; gap: 16px;
-  padding: 10px 20px;
-  background: var(--surface);
-  border-bottom: var(--hairline-w) solid var(--hairline);
-  position: sticky; top: 0; z-index: 10;
-}
-.topbar .brand { font-family: var(--font-display); font-size: 16px; font-weight: 700; color: var(--ink); }
-.topbar .brand span { color: var(--dim); font-size: 13px; font-weight: 400; }
-.topbar .nav { display: flex; gap: 4px; flex: 1; }
-.topbar .spacer { flex: 1; }
-
 /* 动效偏好:减少动态 */
 @media (prefers-reduced-motion: reduce) {
   .spin, .caret { animation: none; }
