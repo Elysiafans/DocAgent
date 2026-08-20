@@ -2,7 +2,7 @@
 import { ref } from 'vue'
 import { login, register, me, setToken } from '../api.js'
 
-const emit = defineEmits(['auth'])
+const emit = defineEmits(['auth', 'back'])
 
 const mode = ref('login') // login | register
 const email = ref('')
@@ -35,8 +35,10 @@ async function submit() {
 
 <template>
   <div class="auth-wrap">
-    <div class="card auth-card">
-      <div class="auth-brand">DocAgent</div>
+    <div class="auth-box">
+      <button class="ghost back" @click="$emit('back')">← 返回首页</button>
+      <div class="card auth-card">
+        <div class="auth-brand">DocAgent</div>
       <p class="muted auth-sub">多智能体知识库问答平台 · 登录以继续</p>
 
       <div class="row auth-tabs">
@@ -87,6 +89,7 @@ async function submit() {
           {{ loading ? '提交中…' : mode === 'login' ? '登录' : '注册并登录' }}
         </button>
       </form>
+      </div>
     </div>
   </div>
 </template>
@@ -99,9 +102,16 @@ async function submit() {
   justify-content: center;
   padding: 32px 20px;
 }
-.auth-card {
+.auth-box {
   width: 100%;
   max-width: 380px;
+}
+.auth-box .back {
+  margin-bottom: 8px;
+  color: var(--text-dim);
+}
+.auth-card {
+  width: 100%;
   padding: 28px 24px;
 }
 .auth-brand {
